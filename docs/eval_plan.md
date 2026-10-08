@@ -245,4 +245,69 @@ Reporting the live record:
 
 ## Changes to this plan
 
-None yet.
+### 2026-10-08: a scenario check at twelve and twenty-four months
+
+Why: the one and three month test above cannot show how arrears respond to
+unemployment, because that response builds over many months. The scenario engine in
+[ADR 0004](decisions/0004-scenarios.md) works over two years. This section fixes a
+check for that horizon. It was written and committed before any scenario code existed
+and before any result for it was seen. Nothing above changes. The bullet "Scenario
+paths that a user sets in the app are separate from this plan" still holds: user paths
+are never scored. This check scores the engine, not a user's path.
+
+What is tested:
+
+- The model is `pooled_arx` from ADR 0004, with its sign rule, refitted at each origin
+  on data up to L only.
+- It is a conditional backtest. At each origin the model is given the actual
+  unemployment and mortgage rate paths after L+1, as if a user had typed in the true
+  path. This breaks the data rule in "Data known at each origin" on purpose, because a
+  scenario is a forecast given a path. The results are never called forecasts, and they
+  never feed the ledger or the one and three month verdict.
+- The baselines are persistence and AR(1), run forward h months from L with no driver
+  data, as defined in "Baselines".
+- If the model cannot beat them even when it knows the true paths, the drivers add
+  nothing a user can rely on at this horizon.
+
+Settings:
+
+| Setting | Value |
+|---|---|
+| Horizons scored | h = 12 and h = 24 | <!-- not-a-claim -->
+| Origins | The same development and test periods as "Backtest design". The test origins run to the last origin whose target month L+h is published |
+| Regions | The seven regions ATL, QC, ON, MB, SK, AB and BC, with equal weight. CA is reported, not used |
+| Metric | MAE in basis points on the test origins, as in "Metrics" |
+| Best baseline | The baseline with the lower development MAE at that horizon, chosen before the test origins are run |
+| Interval on the gap | Moving-block bootstrap as in "Intervals on the metrics", but with blocks of 24 origins, because forecasts this long overlap for two years. 2,000 resamples, seed 0 | <!-- not-a-claim -->
+
+Verdict, for each horizon:
+
+1. The model passes at h when the 95% interval for (model MAE minus best-baseline MAE) <!-- not-a-claim -->
+   lies wholly below zero, and the point estimate is at least 5% lower. <!-- not-a-claim -->
+   These are the same rules as "What counts as beating the baseline".
+2. The test uses every test origin. Origins whose target falls in the deferral months
+   (March 2020 to December 2021) stay in. Results without them are also reported, but
+   never used for the verdict.
+
+What the app says:
+
+- Scenarios are called conditional forecasts only if the model passes at both h = 12 <!-- not-a-claim -->
+  and h = 24. <!-- not-a-claim -->
+- In every other case, every scenario carries the label "Illustrative: not a forecast"
+  and this sentence: "In a backtest on the latest vintage, this model did not forecast
+  arrears better than a simple rule over one to two years, even when it was given the
+  true unemployment and rate paths."
+- If the sign rule drops a driver at the last origin, the page says so whatever the
+  verdict.
+
+Also reported, never used for the verdict:
+
+- The development results, labelled as such.
+- The same three sub-periods as in "Metrics", split by target month.
+- MAE by region, and the ADR 0003 `arx` model run in the same conditional way.
+- The pooled slopes and their intervals at each December origin, and which origins the
+  sign rule dropped a driver at.
+
+The test is run once per model version. Each run adds a row to the append-only test log
+in `reports/`, as for the main test. The single-vintage caveat applies, so every place
+that shows these numbers says "backtest on the latest vintage".
