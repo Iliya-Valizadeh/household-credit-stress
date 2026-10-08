@@ -1,0 +1,13 @@
+# Written by Copier. Do not edit by hand; `copier update` reads it.
+_commit: v1.0
+_src_path: ./ds-project-standard
+author_name: Iliya Valizadeh
+copyright_year: 2026
+github_user: Iliya-Valizadeh
+has_dataset: false
+has_model: true
+one_line: A stress test for Canadian household mortgage debt that refreshes from public
+    data each month and grades its own arrears forecasts in the open.
+package_name: household_credit_stress
+project_name: household-credit-stress
+python_version: '3.11'
