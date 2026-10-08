@@ -6,6 +6,9 @@ the demo output. You need `uv`, `make`, and the Python version named in
 
 ## Step 1: get the code
 
+The repo is not on GitHub yet, so the address below does not work until it is. Until
+then, start from a local copy.
+
 ```bash
 git clone https://github.com/Iliya-Valizadeh/household-credit-stress.git
 cd household-credit-stress
@@ -23,7 +26,7 @@ make setup
 make demo
 ```
 
-`make demo` runs the real [backtest](glossary.md#backtest) on the data already
+This takes a few minutes. `make demo` runs the real [backtest](glossary.md#backtest) on the data already
 committed under `data/processed/`, with no downloads and no keys. It prints the ADR
 0003 `arx` model's gap against the AR(1) [baseline](glossary.md#baseline), in
 [basis points](glossary.md#basis-point), for one month ahead and three months ahead,
