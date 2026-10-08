@@ -114,6 +114,75 @@ def test_fetch_unemployment_asks_for_every_region(monkeypatch: pytest.MonkeyPatc
     assert set(frame["region"]) == set(statcan.GEOGRAPHY.values())
 
 
+def test_coordinate_selects_other_indicators() -> None:
+    assert statcan.coordinate(2) == "2.7.1.1.1.1.0.0.0.0"  # default: unemployment rate
+    assert statcan.coordinate(2, statcan.LABOUR_FORCE) == "2.2.1.1.1.1.0.0.0.0"
+    assert statcan.coordinate(2, statcan.UNEMPLOYED) == "2.6.1.1.1.1.0.0.0.0"
+
+
+def _wds_indicator_item(
+    geo: int, indicator: int, points: list[tuple[str, float | None]]
+) -> dict[str, Any]:
+    return {
+        "status": "SUCCESS",
+        "object": {
+            "coordinate": statcan.coordinate(geo, indicator),
+            "vectorDataPoint": [{"refPer": d, "value": v} for d, v in points],
+        },
+    }
+
+
+def test_parse_labour_force_combines_both_counts_per_region_and_month() -> None:
+    nl = statcan._GEO_BY_REGION["NL"]
+    payload = [
+        _wds_indicator_item(nl, statcan.UNEMPLOYED, [("2026-08-01", 10.0)]),
+        _wds_indicator_item(nl, statcan.LABOUR_FORCE, [("2026-08-01", 100.0)]),
+    ]
+    frame = statcan.parse_labour_force(payload)
+    assert list(frame.columns) == ["month", "region", "unemployed", "labour_force"]
+    row = frame.iloc[0]
+    assert row["region"] == "NL"
+    assert row["unemployed"] == 10.0
+    assert row["labour_force"] == 100.0
+
+
+def test_parse_labour_force_raises_on_failed_item() -> None:
+    with pytest.raises(ValueError):
+        statcan.parse_labour_force([{"status": "FAILED", "object": "bad coordinate"}])
+
+
+def test_parse_labour_force_raises_when_empty() -> None:
+    nl = statcan._GEO_BY_REGION["NL"]
+    with pytest.raises(ValueError):
+        statcan.parse_labour_force(
+            [_wds_indicator_item(nl, statcan.UNEMPLOYED, [("2026-08-01", None)])]
+        )
+
+
+def test_fetch_labour_force_asks_for_both_counts_for_each_atlantic_province(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def fake_get(url: str, body: bytes | None = None, content_type: str | None = None) -> bytes:
+        assert body is not None and content_type == "application/json"
+        request = json.loads(body)
+        assert len(request) == len(statcan.ATLANTIC_PROVINCES) * 2
+        items = [
+            _wds_indicator_item(
+                int(r["coordinate"].split(".")[0]),
+                int(r["coordinate"].split(".")[1]),
+                [("2026-08-01", 1.0)],
+            )
+            for r in request
+        ]
+        return json.dumps(items).encode()
+
+    monkeypatch.setattr(statcan, "get_bytes", fake_get)
+    frame = statcan.fetch_labour_force(latest_n=1)
+    assert set(frame["region"]) == set(statcan.ATLANTIC_PROVINCES)
+    assert frame["unemployed"].notna().all()
+    assert frame["labour_force"].notna().all()
+
+
 # Canadian Bankers Association -----------------------------------------------------
 
 
