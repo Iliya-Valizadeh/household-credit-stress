@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install pinned packages
+        run: uv sync --locked
+
+      - name: Lint and types (ruff, mypy)
+        run: make lint
+
+      - name: Tests (pytest, coverage of src)
+        run: make test
+
+      - name: Docs checks (claims, readability, AI-writing signs, local links, README)
+        run: make check-docs
+
+      - name: Demo runs with no downloads or keys
+        run: make demo
+
+  web-links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Web link check (lychee)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --config tools/lychee.toml './**/*.md'
+          fail: true

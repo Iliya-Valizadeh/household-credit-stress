@@ -1,0 +1,37 @@
+# Settings for lychee, the web link checker. Local links are checked offline by
+# tools/links_check.py, so this file is about links to other websites.
+#
+# Run: lychee --config tools/lychee.toml './**/*.md'
+# In CI: lycheeverse/lychee-action with args: --config tools/lychee.toml './**/*.md'
+
+# Keep a cache between runs so repeated CI runs do not hit the same sites again.
+cache = true
+max_cache_age = "1d"
+
+# Sites are sometimes slow. Retry a few times before calling a link broken.
+max_retries = 3
+retry_wait_time = 2
+timeout = 20
+max_concurrency = 8
+no_progress = true
+
+# 429 means "too many requests". The link exists; the site is only rate limiting us.
+accept = "200..=299, 429"
+
+# Skip addresses that only work on this machine or a private network.
+exclude_all_private = true
+
+# URL patterns (regular expressions) to skip:
+# - LinkedIn answers automated requests with status 999, even for working pages.
+# - example.com and similar are placeholder addresses in docs and templates.
+exclude = [
+    '^https?://(www\.)?linkedin\.com/',
+    '^https?://(www\.)?example\.(com|org|net)',
+]
+
+# Folders (regular expressions) whose Markdown is not ours to check.
+exclude_path = [
+    '\.venv',
+    'node_modules',
+    '\.git/',
+]
