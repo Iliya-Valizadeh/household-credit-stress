@@ -70,6 +70,7 @@ The full list is in [docs/whats_weak.md](docs/whats_weak.md).
 | `CLAIMS.md` | Every number in the docs, with its source file and command |
 | `data/` | Small data files, or scripts that download the data |
 | `docs/` | Evaluation plan, decisions, glossary and the four kinds of docs |
+| `ledger/` | The append-only live forecast and outcome rows (docs/eval_plan.md) |
 | `Makefile` | One command for each step: setup, lint, test, eval, demo |
 | `reports/` | Generated results, including metrics.json |
 | `src/` | The package code |
