@@ -31,8 +31,15 @@ def parse_observations(payload: dict[str, Any], series: str) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values("date", ignore_index=True)
 
 
-def fetch_series(series: str, start: str = "1995-01-01") -> pd.DataFrame:
-    """Download one Valet series from `start` to the latest value."""
+def fetch_series(series: str, start: str = "1989-01-01") -> pd.DataFrame:
+    """Download one Valet series from `start` to the latest value.
+
+    `start` default is 1989-01-01: ADR 0004 (docs/decisions/0004-scenarios.md) needs
+    the posted 5-year rate from 1989-10 for the early-1990s preset, and the Valet
+    series for `MORTGAGE_5Y` covers that far back (checked by hand against
+    https://www.bankofcanada.ca/valet/observations/V80691335/json?start_date=1989-01-01
+    before this change).
+    """
     raw = get_bytes(VALET_URL.format(series=series, start=start))
     return parse_observations(json.loads(raw), series)
 
