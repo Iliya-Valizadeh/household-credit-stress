@@ -34,12 +34,15 @@ jobs:
       - name: Pull the latest data
         run: uv run python -m household_credit_stress.refresh
 
-      - name: Commit new data, if any
+      - name: Update the live forecast ledger
+        run: uv run python -m household_credit_stress.forecast
+
+      - name: Commit new data and ledger rows, if any
         run: |
-          git add data/
+          git add data/ ledger/
           # status.json changes on every run (its check time), so only commit when a
-          # data file itself changed.
-          if git diff --cached --quiet -- data/processed data/raw; then
+          # data file, or a ledger row, actually changed.
+          if git diff --cached --quiet -- data/processed data/raw ledger; then
             echo "No new data."
             exit 0
           fi
