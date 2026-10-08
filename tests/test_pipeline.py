@@ -1,16 +1,13 @@
-"""Tests for the template's worked example. Replace them along with the example."""
+"""Tests for the template's worked example (data.py, models.py, demo.py). Replace them
+along with the example. evaluate.py and metrics.py's bootstrap helpers now run the
+real backtest; see test_backtest.py."""
 
 from __future__ import annotations
-
-import json
-from pathlib import Path
 
 import numpy as np
 import pytest
 
-from household_credit_stress import __version__, data, demo, evaluate, metrics, models
-
-REPO = Path(__file__).resolve().parent.parent
+from household_credit_stress import __version__, data, demo, metrics, models
 
 
 def test_version_is_set() -> None:
@@ -91,37 +88,6 @@ def test_bootstrap_rejects_bad_settings(n_resamples: int, level: float) -> None:
     y = np.ones(5)
     with pytest.raises(ValueError):
         metrics.bootstrap_mae(y, y, n_resamples, level, seed=0)
-
-
-def test_evaluation_writes_metrics_and_chart(tmp_path: Path) -> None:
-    assert evaluate.main(["--reports-dir", str(tmp_path)]) == 0
-    written = json.loads((tmp_path / evaluate.METRICS_FILE).read_text(encoding="utf-8"))
-    assert (tmp_path / evaluate.CHART_FILE).stat().st_size > 0
-    assert written["model"]["value"] < written["baseline"]["value"]
-    for key in ("baseline", "model", "mae_gap"):
-        assert written[key]["ci_low"] <= written[key]["value"] <= written[key]["ci_high"]
-
-
-def test_committed_metrics_match_a_fresh_run() -> None:
-    """reports/metrics.json must be what the code makes. Run `make eval` if this fails."""
-    committed = json.loads((REPO / "reports" / "metrics.json").read_text(encoding="utf-8"))
-    fresh, _ = evaluate.run_evaluation()
-    flat_committed, flat_fresh = _flatten(committed), _flatten(fresh)
-    assert flat_committed.keys() == flat_fresh.keys()
-    for key, value in flat_fresh.items():
-        if isinstance(value, float):
-            assert flat_committed[key] == pytest.approx(value, abs=10**-evaluate.DECIMALS), key
-        else:
-            assert flat_committed[key] == value, key
-
-
-def _flatten(node: object, prefix: str = "") -> dict[str, object]:
-    if isinstance(node, dict):
-        out: dict[str, object] = {}
-        for key, value in node.items():
-            out.update(_flatten(value, f"{prefix}{key}."))
-        return out
-    return {prefix.rstrip("."): node}
 
 
 def test_demo_prints_the_result(capsys: pytest.CaptureFixture[str]) -> None:

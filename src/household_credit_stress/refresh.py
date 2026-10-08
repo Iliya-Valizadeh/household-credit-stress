@@ -34,7 +34,12 @@ DATA_DIR = Path("data")
 
 # How many months old a source's newest value may be before it counts as stale. The
 # CBA publishes about two months after the month it reports on.
-MAX_AGE_MONTHS = {"mortgage_rate_5y": 2, "unemployment": 3, "arrears": 5}
+MAX_AGE_MONTHS = {
+    "mortgage_rate_5y": 2,
+    "unemployment": 3,
+    "arrears": 5,
+    "labour_force": 3,
+}
 
 
 @dataclass
@@ -63,10 +68,18 @@ def _pull_arrears(data_dir: Path) -> pd.DataFrame:
     return frame
 
 
+def _pull_labour_force(data_dir: Path) -> pd.DataFrame:
+    # Unemployed and labour-force counts for the four Atlantic provinces, used to
+    # build the ATL unemployment rate; see features.atlantic_unemployment_rate and
+    # "Atlantic unemployment" in docs/eval_plan.md.
+    return statcan.fetch_labour_force()
+
+
 PULLERS: dict[str, Callable[[Path], pd.DataFrame]] = {
     "mortgage_rate_5y": _pull_rates,
     "unemployment": _pull_unemployment,
     "arrears": _pull_arrears,
+    "labour_force": _pull_labour_force,
 }
 
 
