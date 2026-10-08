@@ -80,7 +80,7 @@ def _check_history(history: pd.DataFrame, cutoff: pd.Timestamp) -> None:
         raise ValueError(f"history has no row for the cutoff {cutoff:%Y-%m}")
 
 
-def _monthly(series: pd.Series) -> pd.Series:
+def monthly_series(series: pd.Series) -> pd.Series:
     """Sort by month and fill gaps with NaN, so a shift is always one calendar month."""
     series = series.sort_index()
     return series.asfreq("MS")
@@ -122,11 +122,15 @@ def driver_terms(drivers: pd.DataFrame) -> pd.DataFrame:
     return terms
 
 
-def _design(
+def design_rows(
     history: pd.DataFrame, drop_diff_month: pd.Timestamp | None
 ) -> tuple[pd.DataFrame, pd.Series]:
-    """Rows of the least-squares fit: the target d(t) and the columns d(t-1), x_u, x_m."""
-    rate = _monthly(history.set_index(pd.to_datetime(history["month"]))["arrears_rate_bp"])
+    """Rows of the least-squares fit: the target d(t) and the columns d(t-1), x_u, x_m.
+
+    Public so the scenario engine (ADR 0004, `scenario.py`) can stack these rows
+    across regions for the pooled fit.
+    """
+    rate = monthly_series(history.set_index(pd.to_datetime(history["month"]))["arrears_rate_bp"])
     change = rate.diff()
     terms = driver_terms(calendar_drivers(history))
     frame = pd.DataFrame(
@@ -154,7 +158,7 @@ def fit_arx(
     than `MIN_FIT_ROWS` rows can be used.
     """
     _check_history(history, cutoff)
-    x, y = _design(history, drop_diff_month)
+    x, y = design_rows(history, drop_diff_month)
     if len(y) < MIN_FIT_ROWS:
         raise ValueError(
             f"too few rows to fit at {cutoff:%Y-%m}: {len(y)} usable, need {MIN_FIT_ROWS}"
@@ -205,7 +209,7 @@ def forecast_arx(history: pd.DataFrame, cutoff: pd.Timestamp, horizon: int, fit:
     if horizon < 1:
         raise ValueError(f"horizon must be at least 1, got {horizon}")
     _check_history(history, cutoff)
-    rate = _monthly(history.set_index(pd.to_datetime(history["month"]))["arrears_rate_bp"])
+    rate = monthly_series(history.set_index(pd.to_datetime(history["month"]))["arrears_rate_bp"])
     level = float(rate.loc[cutoff])
     last_change = rate.diff().get(cutoff, np.nan)
     last_change = 0.0 if pd.isna(last_change) else float(last_change)
