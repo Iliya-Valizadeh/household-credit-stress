@@ -1,49 +1,36 @@
 """Short demo for `make demo`. It must run with no downloads and no keys.
 
-It fits the template's worked example (a linear model against a training-mean
-baseline) on built-in synthetic data and prints the result. It writes no files.
-`evaluate.py` now runs the real backtest in `backtest.py`, which needs the processed
-data files, so this demo no longer goes through it. Replace this with a demo of your
-real pipeline.
+It runs the real backtest (`backtest.py`, via `evaluate.run_evaluation`) on the
+committed processed data under `data/processed/` and prints the ADR 0003 `arx`
+model's test-period result against its baseline, for horizons 1 and 3 months. It
+reads only files already in the repo and writes none; `make eval` is what writes
+`reports/backtest.csv` and `reports/metrics.json`.
 """
 
 from __future__ import annotations
 
-from .data import make_dataset, train_test_split
-from .metrics import Estimate, bootstrap_mae, bootstrap_mae_gap
-from .models import LinearModel, MeanBaseline
+from pathlib import Path
 
-SEED = 7
-N_ROWS = 1000
-TEST_FRACTION = 0.2
-N_RESAMPLES = 2000
-LEVEL = 0.95
+from . import evaluate
 
-
-def _line(label: str, est: Estimate) -> str:
-    interval = f"(95% interval {est.ci_low:.3f} to {est.ci_high:.3f})"
-    return f"{label:<28}{est.value:.3f}  {interval}"
+DATA_DIR = Path("data")
+HORIZONS = (1, 3)
 
 
 def main() -> int:
-    x, y = make_dataset(N_ROWS, seed=SEED)
-    split = train_test_split(x, y, TEST_FRACTION, seed=SEED + 1)
-
-    baseline = MeanBaseline().fit(split.x_train, split.y_train)
-    model = LinearModel().fit(split.x_train, split.y_train)
-    pred_base = baseline.predict(split.x_test)
-    pred_model = model.predict(split.x_test)
-
-    boot_seed = SEED + 2
-    est_base = bootstrap_mae(split.y_test, pred_base, N_RESAMPLES, LEVEL, boot_seed)
-    est_model = bootstrap_mae(split.y_test, pred_model, N_RESAMPLES, LEVEL, boot_seed)
-    est_gap = bootstrap_mae_gap(split.y_test, pred_base, pred_model, N_RESAMPLES, LEVEL, boot_seed)
-
-    print(f"Synthetic data: {len(split.y_train)} training rows, {len(split.y_test)} test rows.")
-    print("Mean absolute error on the test rows (lower is better):")
-    print(_line("  Baseline (training mean)", est_base))
-    print(_line("  Linear model", est_model))
-    print(_line("  Gap (baseline - model)", est_gap))
+    metrics, _ = evaluate.run_evaluation(DATA_DIR)
+    print("ADR 0003 arx model vs. its baseline, test period (docs/eval_plan.md):")
+    for h in HORIZONS:
+        comparison = metrics["model"][f"h{h}"]
+        if comparison is None:
+            print(f"  h{h}: not enough test-period data yet")
+            continue
+        gap = comparison["gap_bp"]
+        print(
+            f"  h{h} vs {comparison['baseline']}: gap {gap['value']} bp "
+            f"(95% interval {gap['ci_low']} to {gap['ci_high']}), "
+            f"verdict: {comparison['verdict']}"
+        )
     return 0
 
 

@@ -1,5 +1,5 @@
 {
-  "about": "Backtest of the persistence and AR(1) baselines in docs/eval_plan.md, 'Baselines'. Pooled MAE is averaged with equal weight over the seven CBA regions ATL, QC, ON, MB, SK, AB, BC (not CA), in basis points, with a moving-block bootstrap interval over origin months. This is a backtest on the latest published vintage of every input, not the point-in-time numbers a user would have seen then; see the single-vintage caveat in docs/eval_plan.md. The model's own rows are added once T05 has a model to score.",
+  "about": "Backtest of the persistence and AR(1) baselines (docs/eval_plan.md, 'Baselines') and the ADR 0003 arx model. Pooled MAE is averaged with equal weight over the seven CBA regions ATL, QC, ON, MB, SK, AB, BC (not CA), in basis points, with a moving-block bootstrap interval over origin months. This is a backtest on the latest published vintage of every input, not the point-in-time numbers a user would have seen then; see the single-vintage caveat in docs/eval_plan.md.",
   "generated_by": "python -m household_credit_stress.evaluate",
   "regions": [
     "ATL",
@@ -158,11 +158,150 @@
           "CA": 0.97
         }
       }
+    },
+    "arx": {
+      "h1": {
+        "dev": {
+          "mae_bp": {
+            "value": 0.86,
+            "ci_low": 0.78,
+            "ci_high": 0.93
+          },
+          "n_origins": 120,
+          "interval_coverage_80": null,
+          "interval_width_bp": null
+        },
+        "test": {
+          "mae_bp": {
+            "value": 0.73,
+            "ci_low": 0.6,
+            "ci_high": 0.93
+          },
+          "n_origins": 114,
+          "interval_coverage_80": 0.848,
+          "interval_width_bp": 2.6
+        },
+        "by_region_test_mae_bp": {
+          "ATL": 0.81,
+          "QC": 0.64,
+          "ON": 0.38,
+          "MB": 0.84,
+          "SK": 1.29,
+          "AB": 0.78,
+          "BC": 0.38,
+          "CA": 0.38
+        }
+      },
+      "h3": {
+        "dev": {
+          "mae_bp": {
+            "value": 1.88,
+            "ci_low": 1.66,
+            "ci_high": 2.15
+          },
+          "n_origins": 120,
+          "interval_coverage_80": null,
+          "interval_width_bp": null
+        },
+        "test": {
+          "mae_bp": {
+            "value": 1.66,
+            "ci_low": 1.21,
+            "ci_high": 2.35
+          },
+          "n_origins": 112,
+          "interval_coverage_80": 0.844,
+          "interval_width_bp": 5.8
+        },
+        "by_region_test_mae_bp": {
+          "ATL": 1.82,
+          "QC": 1.37,
+          "ON": 1.15,
+          "MB": 1.56,
+          "SK": 2.84,
+          "AB": 1.95,
+          "BC": 0.96,
+          "CA": 1.09
+        }
+      }
     }
   },
   "best_baseline": {
     "h1": "ar1",
     "h3": "ar1"
   },
-  "model": null
+  "model": {
+    "name": "arx",
+    "h1": {
+      "baseline": "ar1",
+      "gap_bp": {
+        "value": 0.03,
+        "ci_low": -0.01,
+        "ci_high": 0.12
+      },
+      "relative_gain": -0.048,
+      "beats_baseline": false,
+      "intervals_ok": true,
+      "verdict": "no_clear_difference"
+    },
+    "h3": {
+      "baseline": "ar1",
+      "gap_bp": {
+        "value": 0.17,
+        "ci_low": -0.03,
+        "ci_high": 0.54
+      },
+      "relative_gain": -0.115,
+      "beats_baseline": false,
+      "intervals_ok": true,
+      "verdict": "no_clear_difference"
+    },
+    "coefficients_last_origin": {
+      "cutoff": "2026-07",
+      "by_region": {
+        "ATL": {
+          "phi": 0.2808,
+          "beta_unemployment": 0.1496,
+          "beta_rate": -0.351,
+          "n_obs": 364
+        },
+        "QC": {
+          "phi": 0.1366,
+          "beta_unemployment": 1.569,
+          "beta_rate": 2.982,
+          "n_obs": 364
+        },
+        "ON": {
+          "phi": 0.3177,
+          "beta_unemployment": 0.8059,
+          "beta_rate": 1.9887,
+          "n_obs": 364
+        },
+        "MB": {
+          "phi": 0.078,
+          "beta_unemployment": 0.1677,
+          "beta_rate": -1.477,
+          "n_obs": 362
+        },
+        "SK": {
+          "phi": 0.0618,
+          "beta_unemployment": 0.6912,
+          "beta_rate": 0.6917,
+          "n_obs": 362
+        },
+        "AB": {
+          "phi": 0.4703,
+          "beta_unemployment": 1.1191,
+          "beta_rate": 0.3287,
+          "n_obs": 364
+        },
+        "BC": {
+          "phi": 0.2367,
+          "beta_unemployment": 0.8585,
+          "beta_rate": 0.0432,
+          "n_obs": 364
+        }
+      }
+    }
+  }
 }

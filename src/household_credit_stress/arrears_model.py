@@ -63,7 +63,12 @@ class ArxFit:
 
 
 def _check_history(history: pd.DataFrame, cutoff: pd.Timestamp) -> None:
-    """Raise if the panel rows run past the cutoff (look-ahead) or miss it."""
+    """Raise if the panel rows run past the cutoff (look-ahead), miss it, or lack
+    the driver columns this model needs (so a caller can treat that the same way as
+    too-few-rows: skip this model for the origin, not fail the whole backtest)."""
+    missing = [col for col in DRIVER_COLUMNS if col not in history.columns]
+    if missing:
+        raise ValueError(f"history is missing driver column(s): {', '.join(missing)}")
     months = pd.to_datetime(history["month"])
     future = months[months > cutoff]
     if len(future) > 0:

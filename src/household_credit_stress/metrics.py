@@ -12,8 +12,9 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
-from .data import Array
+Array = NDArray[np.float64]
 
 
 @dataclass(frozen=True)
