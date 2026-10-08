@@ -27,7 +27,7 @@ from typing import Any, Final
 import numpy as np
 import pandas as pd
 
-from . import features
+from . import arrears_model, features
 from .metrics import Estimate, moving_block_bootstrap_mae
 
 # The CBA regions scored (features.REGIONS is CA plus these seven; see
@@ -35,7 +35,17 @@ from .metrics import Estimate, moving_block_bootstrap_mae
 PRIMARY_REGIONS: Final = tuple(r for r in features.REGIONS if r != "CA")
 
 HORIZONS: Final = (1, 3)
-MODELS: Final = ("persistence", "ar1")
+# The two rules from docs/eval_plan.md, "Baselines". The model (ADR 0003) is scored
+# against whichever of these has the lower dev MAE at each horizon; it is never a
+# candidate for "best_baseline" itself.
+BASELINE_MODELS: Final = ("persistence", "ar1")
+MODEL_NAME: Final = arrears_model.MODEL_NAME
+MODELS: Final = (*BASELINE_MODELS, MODEL_NAME)
+
+# "What counts as beating the baseline" in docs/eval_plan.md.
+MIN_RELATIVE_GAIN: Final = 0.05
+MIN_COVERAGE_80: Final = 0.70
+MAX_COVERAGE_80: Final = 0.90
 
 # Backtest design, docs/eval_plan.md.
 DEV_START: Final = pd.Timestamp("2007-01-01")
@@ -193,9 +203,8 @@ def run_backtest(
     """
     rows: list[dict[str, Any]] = []
     for region in regions:
-        history = (
-            panel.loc[panel["region"] == region].set_index("month")["arrears_rate_bp"].sort_index()
-        )
+        region_panel = panel.loc[panel["region"] == region].sort_values("month")
+        history = region_panel.set_index("month")["arrears_rate_bp"].sort_index()
         if history.empty:
             continue
         drop_month = MB_SK_LEVEL_SHIFT_MONTH if region in LEVEL_SHIFT_REGIONS else None
@@ -210,14 +219,35 @@ def run_backtest(
             known = history.loc[:origin]
             phi = fit_ar1(known, origin, drop_month)
             persistence_forecast = forecast_persistence(known, origin)
+
+            known_panel = region_panel.loc[region_panel["month"] <= origin]
+            try:
+                arx_fit: arrears_model.ArxFit | None = arrears_model.fit_arx(
+                    known_panel, origin, drop_month
+                )
+            except ValueError:
+                # Too few usable rows to fit yet (ADR 0003, MIN_FIT_ROWS); the origin
+                # is skipped for this model only, not for the baselines.
+                arx_fit = None
+
             for h in horizons:
                 forecasts[(origin, h, "persistence")] = persistence_forecast
                 forecasts[(origin, h, "ar1")] = forecast_ar1(known, origin, h, phi)
+                if arx_fit is not None:
+                    try:
+                        forecasts[(origin, h, MODEL_NAME)] = arrears_model.forecast_arx(
+                            known_panel, origin, h, arx_fit
+                        )
+                    except ValueError:
+                        # The drivers needed for this horizon are not known yet.
+                        pass
                 target = origin + pd.DateOffset(months=h)
                 if target in history.index:
                     actual = float(history.loc[target])
                     for model in MODELS:
-                        errors[(h, model)][origin] = actual - forecasts[(origin, h, model)]
+                        key = (origin, h, model)
+                        if key in forecasts:
+                            errors[(h, model)][origin] = actual - forecasts[key]
 
         for origin in origins:
             if origin not in history.index:
@@ -229,7 +259,10 @@ def run_backtest(
                 actual = float(history.loc[target])
                 known_by = origin - pd.DateOffset(months=h)
                 for model in MODELS:
-                    forecast = forecasts[(origin, h, model)]
+                    key = (origin, h, model)
+                    if key not in forecasts:
+                        continue
+                    forecast = forecasts[key]
                     prior = [e for t, e in errors[(h, model)].items() if t <= known_by]
                     if len(prior) >= MIN_INTERVAL_ERRORS:
                         lo_bp = forecast + float(np.percentile(prior, 10))
@@ -312,14 +345,101 @@ def _pooled_summary(
     }
 
 
+def _model_vs_baseline(
+    backtest: pd.DataFrame, baselines: dict[str, Any], best_baseline: dict[str, str], horizon: int
+) -> dict[str, Any] | None:
+    """The ADR 0003 model against the horizon's best baseline, on the test period.
+
+    Implements "What counts as beating the baseline" in docs/eval_plan.md: the gap
+    (model MAE minus the baseline's) gets its own moving-block bootstrap interval,
+    built by pairing the model's and the baseline's errors at the same origin and
+    region, so the same resampled months are used for both (the plan's "Pairing").
+    """
+    baseline_model = best_baseline.get(f"h{horizon}")
+    if baseline_model is None:
+        return None
+    columns = ["origin_month", "region", "abs_error_bp"]
+    model_errors = backtest[
+        (backtest["model"] == MODEL_NAME)
+        & (backtest["horizon"] == horizon)
+        & (backtest["period"] == "test")
+        & (backtest["region"].isin(PRIMARY_REGIONS))
+    ][columns]
+    baseline_errors = backtest[
+        (backtest["model"] == baseline_model)
+        & (backtest["horizon"] == horizon)
+        & (backtest["period"] == "test")
+        & (backtest["region"].isin(PRIMARY_REGIONS))
+    ][columns]
+    if model_errors.empty or baseline_errors.empty:
+        return None
+    paired = model_errors.merge(
+        baseline_errors, on=["origin_month", "region"], suffixes=("_model", "_baseline")
+    )
+    diff = pd.DataFrame(
+        {
+            "origin": paired["origin_month"],
+            "abs_error": paired["abs_error_bp_model"] - paired["abs_error_bp_baseline"],
+        }
+    )
+    gap = moving_block_bootstrap_mae(diff, BLOCK_MONTHS, N_RESAMPLES, CI_LEVEL, BOOT_SEED)
+
+    baseline_mae = baselines[baseline_model][f"h{horizon}"]["test"]["mae_bp"]["value"]
+    coverage = baselines[MODEL_NAME][f"h{horizon}"]["test"]["interval_coverage_80"]
+    relative_gain = -gap.value / baseline_mae if baseline_mae else 0.0
+    beats_baseline = gap.ci_high < 0.0 and relative_gain >= MIN_RELATIVE_GAIN
+    intervals_ok = coverage is not None and MIN_COVERAGE_80 <= coverage <= MAX_COVERAGE_80
+    if gap.ci_low > 0.0:
+        verdict = "worse"
+    elif beats_baseline:
+        verdict = "beats_baseline"
+    else:
+        verdict = "no_clear_difference"
+
+    return {
+        "baseline": baseline_model,
+        "gap_bp": _rounded(gap),
+        "relative_gain": round(relative_gain, 3),
+        "beats_baseline": beats_baseline,
+        "intervals_ok": intervals_ok,
+        "verdict": verdict,
+    }
+
+
+def coefficients_at_cutoff(
+    panel: pd.DataFrame, cutoff: pd.Timestamp, regions: tuple[str, ...] = PRIMARY_REGIONS
+) -> dict[str, Any]:
+    """The ADR 0003 fit (phi, beta_unemployment, beta_rate) for each region at
+    `cutoff`, the last origin the backtest reaches. T08's scenario engine needs the
+    sign of each driver's slope; see the T04 note in `_portfolio/hcs/TASKS.md`.
+    """
+    coefficients: dict[str, Any] = {}
+    for region in regions:
+        region_panel = panel.loc[panel["region"] == region].sort_values("month")
+        known_panel = region_panel.loc[region_panel["month"] <= cutoff]
+        drop_month = MB_SK_LEVEL_SHIFT_MONTH if region in LEVEL_SHIFT_REGIONS else None
+        try:
+            fit = arrears_model.fit_arx(known_panel, cutoff, drop_month)
+        except ValueError as exc:
+            coefficients[region] = {"error": str(exc)}
+            continue
+        coefficients[region] = {
+            "phi": round(fit.phi, 4),
+            "beta_unemployment": round(fit.beta_unemployment, 4),
+            "beta_rate": round(fit.beta_rate, 4),
+            "n_obs": fit.n_obs,
+        }
+    return coefficients
+
+
 def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
-    """Baseline rows of `reports/metrics.json`: pooled MAE over the seven primary
-    regions, by model and horizon, for the development and test periods in
-    docs/eval_plan.md, with a moving-block bootstrap interval and the 80% interval's
-    coverage. Also reported, never used for the verdict: each region's own test MAE.
-    `best_baseline` is the lower-dev-MAE baseline at each horizon, chosen once, per
-    "Baselines" in docs/eval_plan.md. The model's own rows are added once T05 has a
-    model to score.
+    """`reports/metrics.json`: pooled MAE over the seven primary regions, by model
+    and horizon, for the development and test periods in docs/eval_plan.md, with a
+    moving-block bootstrap interval and the 80% interval's coverage. Also reported,
+    never used for the verdict: each region's own test MAE. `best_baseline` is the
+    lower-dev-MAE baseline at each horizon, chosen once from `BASELINE_MODELS`, per
+    "Baselines" in docs/eval_plan.md. `model` scores the ADR 0003 model (`MODEL_NAME`)
+    against that baseline, per "What counts as beating the baseline".
     """
     baselines: dict[str, Any] = {}
     for model in MODELS:
@@ -344,23 +464,26 @@ def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
     for h in HORIZONS:
         candidates = {
             model: baselines[model][f"h{h}"]["dev"]["mae_bp"]["value"]
-            for model in MODELS
+            for model in BASELINE_MODELS
             if baselines[model][f"h{h}"]["dev"] is not None
         }
         if candidates:
             best_baseline[f"h{h}"] = min(candidates, key=lambda model: candidates[model])
 
+    model_summary = {
+        f"h{h}": _model_vs_baseline(backtest, baselines, best_baseline, h) for h in HORIZONS
+    }
+
     test_end = f"{backtest['origin_month'].max():%Y-%m}" if not backtest.empty else None
     return {
         "about": (
-            "Backtest of the persistence and AR(1) baselines in docs/eval_plan.md, "
-            "'Baselines'. Pooled MAE is averaged with equal weight over the seven "
-            "CBA regions ATL, QC, ON, MB, SK, AB, BC (not CA), in basis points, with "
-            "a moving-block bootstrap interval over origin months. This is a "
-            "backtest on the latest published vintage of every input, not the "
-            "point-in-time numbers a user would have seen then; see the "
-            "single-vintage caveat in docs/eval_plan.md. The model's own rows are "
-            "added once T05 has a model to score."
+            "Backtest of the persistence and AR(1) baselines (docs/eval_plan.md, "
+            "'Baselines') and the ADR 0003 arx model. Pooled MAE is averaged with "
+            "equal weight over the seven CBA regions ATL, QC, ON, MB, SK, AB, BC "
+            "(not CA), in basis points, with a moving-block bootstrap interval over "
+            "origin months. This is a backtest on the latest published vintage of "
+            "every input, not the point-in-time numbers a user would have seen "
+            "then; see the single-vintage caveat in docs/eval_plan.md."
         ),
         "generated_by": "python -m household_credit_stress.evaluate",
         "regions": list(PRIMARY_REGIONS),
@@ -376,5 +499,5 @@ def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
         },
         "baselines": baselines,
         "best_baseline": best_baseline,
-        "model": None,
+        "model": {"name": MODEL_NAME, **model_summary},
     }

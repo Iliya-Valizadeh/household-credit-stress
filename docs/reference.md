@@ -19,17 +19,17 @@ Facts to look up: commands, files and settings.
 | File | What it holds |
 |---|---|
 | `reports/metrics.json` | The headline numbers, read by `CLAIMS.md` and the portfolio site |
-| `reports/figures/mae_by_model.png` | The headline chart that `make eval` draws |
+| `reports/figures/mae_arx_vs_baseline.png` | The headline chart that `make eval` draws |
 
 ## Package
 
-The template ships a small worked example. Replace these modules with your own and
-update this table.
-
 | Module | What it does |
 |---|---|
-| `data.py` | Makes a seeded synthetic dataset and splits it into train and test rows |
-| `models.py` | A [baseline](glossary.md#baseline) that predicts the training mean, and a linear model |
+| `sources/` | Fetches and parses each public source (`boc.py`, `statcan.py`, `cba.py`, `http.py`) |
+| `refresh.py` | Pulls all sources and writes `data/processed/*.csv` and `data/status.json` |
+| `features.py` | Builds the monthly feature panel, with point-in-time lags, used by the [backtest](glossary.md#backtest) |
+| `arrears_model.py` | The ADR 0003 `arx` model: the AR(1) [baseline](glossary.md#baseline) plus two lagged drivers |
+| `backtest.py` | The expanding-window backtest harness and the persistence and AR(1) baselines |
 | `metrics.py` | [Mean absolute error](glossary.md#mean-absolute-error) with a [bootstrap](glossary.md#bootstrap) [confidence interval](glossary.md#confidence-interval) |
 | `plots.py` | Draws the headline chart |
 | `evaluate.py` | Runs the evaluation for `make eval` and writes the files above |
