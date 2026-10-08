@@ -4,12 +4,17 @@ A stress test for Canadian household mortgage debt that refreshes from public da
 
 ## In plain words
 
-TODO: three short sentences that a person with no technical background can follow.
-Say what goes in, what comes out, and why someone would care.
+Each month this tool reads the mortgage rate, the jobless rate, and how many Canadian
+mortgages are behind on payments, one region at a time. It guesses next month's
+numbers before the bank group that tracks them does, then checks its own guess once
+the real numbers come out, where anyone can see it. You can also move sliders for the
+rate and job losses to see how arrears might shift over the next two years. That part
+is a picture of "what if", not a number to plan around.
 
 ## Try it
 
-TODO: a live link if one exists. Otherwise these three commands:
+There is no live link yet. The static page in `site/` runs locally; otherwise these
+three commands:
 
 ```bash
 make setup
@@ -21,18 +26,27 @@ make all
 
 ## Result
 
-TODO: one number with its [confidence interval](docs/glossary.md#confidence-interval),
-compared against a simple [baseline](docs/glossary.md#baseline). Every number here
-needs a row in [CLAIMS.md](CLAIMS.md) that points to `reports/metrics.json`.
+The one- and three-month model (`arx`, [ADR 0003](docs/decisions/0003-arrears-model.md))
+does not beat the simplest [baseline](docs/glossary.md#baseline) it was built to beat.
+Against AR(1), its test-period [mean absolute error](docs/glossary.md#mean-absolute-error)
+is worse by 0.03 bp one month ahead and by 0.17 bp three months ahead, and both ranges cover zero: -0.01 to 0.12 bp, and -0.03 to 0.54 bp, at a 95% confidence level. <!-- not-a-claim -->
+See [CLAIMS.md](CLAIMS.md) for where each number comes from.
 
-TODO: one chart, with a caption that says what to notice.
+![Each model's test MAE in basis points, as a dot, with its interval as a
+line.](reports/figures/mae_arx_vs_baseline.png)
+
+`arx` sits to the right of AR(1) at both horizons, not to the left, so the chart shows
+the same result: more error, not less.
 
 ## How I worked
 
 - Evaluation plan, written before any results: [docs/eval_plan.md](docs/eval_plan.md)
-  (TODO: the commit hash that added it).
+  (commit `bc8acfd`).
 - Decision records: [docs/decisions/](docs/decisions/).
-- Error analysis: TODO: link.
+- Error analysis: the per-region slope instability and the no-clear-difference result
+  that led to pooling the drivers for the scenario engine, in
+  [0004-scenarios.md](docs/decisions/0004-scenarios.md) ("Context") and
+  [docs/whats_weak.md](docs/whats_weak.md).
 - How ready it is for production, scored against Breck et al.'s checklist:
   [docs/ml_test_score.md](docs/ml_test_score.md).
 - How the AI assistant was used: [AI_USAGE.md](AI_USAGE.md).
@@ -41,15 +55,33 @@ TODO: one chart, with a caption that says what to notice.
 
 ```mermaid
 flowchart LR
-    A[Input] --> B[Model] --> C[Output]
+    A[BoC, StatCan, CBA] --> B[refresh.py]
+    B --> C[data/processed/*.csv]
+    C --> D[features.py]
+    D --> E["arrears_model.py (arx)"]
+    D --> F["scenario.py (pooled_arx)"]
+    E --> G["forecast.py (ledger/)"]
+    F --> H["site_data.py (site/)"]
 ```
 
-TODO: five lines of text that explain the diagram.
+`refresh.py` pulls the three public sources every month and writes the processed CSV
+files plus a status file that flags stale data. `features.py`
+builds one row per region and month, with every driver lagged to what a forecaster
+could have known on that date. `arrears_model.py`'s `arx` equation makes the one- and
+three-month ledger forecasts that `forecast.py` appends to
+an append-only record. `scenario.py` reuses the same equation, pooled across regions,
+to turn a user's rate and unemployment path into an illustrative two-year arrears path.
+`site_data.py` exports the numbers both paths need as JSON, and the static page in
+`site/` adds them up itself.
 
 ## What's weak
 
-TODO: the main weaknesses, ranked by how much each could change the result.
-The full list is in [docs/whats_weak.md](docs/whats_weak.md).
+The two biggest weaknesses: `arx` does not beat AR(1) at one and three months (see
+"Result" above), and the scenario engine's own twelve- and twenty-four-month check
+against AR(1) also fails, so every scenario is shown as "Illustrative: not a forecast",
+never as a conditional forecast. The full ranked list, including why history before
+this repo's own archive is visible only as its latest revision, is in
+[docs/whats_weak.md](docs/whats_weak.md).
 
 ## Docs
 
