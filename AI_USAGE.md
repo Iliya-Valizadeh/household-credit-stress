@@ -3,36 +3,39 @@ DRAFT: Iliya to edit
 # How the AI assistant was used
 
 This page says which parts of the work were mine and which parts an AI coding assistant
-wrote. The owner of the repo edits it and removes the draft line above.
+did. The owner of the repo edits it and removes the draft line above.
+
+The assistant drafted this page from the repo's own record: the commit history, the
+`Co-Authored-By` lines on each commit, and the task notes. It does not claim any
+decision for me that the record does not show. Iliya: add your own part below, in your
+own words, and delete this paragraph.
 
 ## What I decided
 
-I set the question in [docs/eval_plan.md](docs/eval_plan.md) before any model code
-existed: can mortgage rates, unemployment and past arrears forecast the arrears rate by
-region better than a simple rule, one and three months ahead. I fixed the data, the
-target, the publication lags, the [baseline](docs/glossary.md#baseline) each model must
-beat, the metric and the rule for a win, and the choice of model and the scenario
-design in
-[docs/decisions/](docs/decisions/), each written and committed before its result was
-seen. I set the task queue the assistant worked from, and decided what each task would
-cover.
+Iliya to write: what you chose yourself, for example the project idea and the audience,
+and any choice you changed after reading a draft.
 
-## What I checked
+## What the AI assistant did
 
-I reviewed the pipeline and the quality gates after the core model and the live ledger
-were built, before any scenario work started, and recorded a pre-registered verdict:
-`arx` showed no clear difference from AR(1), and its per-region driver coefficients
-were unstable enough that they should not drive scenarios as they stood. That review
-set the direction for the scenario design that followed. I check that every number
-quoted in this repo's docs has a row in [CLAIMS.md](CLAIMS.md) pointing at a committed,
-runnable command, and that `make check-docs` and `make test` pass before anything is
-merged.
+Claude Code, an AI coding assistant, did almost all of the work, in separate sessions:
 
-## What the AI assistant wrote
+- Design sessions wrote the evaluation plan
+  ([docs/eval_plan.md](docs/eval_plan.md)) and the decision records in
+  [docs/decisions/](docs/decisions/). The plan and ADRs 0002 to 0004 were each
+  committed before the result they govern.
+- Build sessions wrote the source fetchers, the feature panel, the
+  [backtest](docs/glossary.md#backtest) harness, both models, the live ledger, the
+  scenario engine, the static page, the tests and the first draft of every document.
+- A review session checked the work after the live ledger and before the scenario
+  design. It recorded that `arx` showed no clear difference from AR(1) and that its
+  per-region slopes were too unstable to drive scenarios. That review set the direction
+  for ADR 0004.
+- A final review session traced each number to `CLAIMS.md`, ranked the weaknesses and
+  scored [docs/ml_test_score.md](docs/ml_test_score.md).
 
-The assistant wrote the source fetchers, the feature panel, the
-[backtest](docs/glossary.md#backtest) harness, both
-models, the live ledger code, the scenario engine, the static page, the tests and the
-first drafts of every document in this repo, including this one, each against the
-decisions above. [docs/whats_weak.md](docs/whats_weak.md) and the README's "What's
-weak" section list what it found weak in its own work.
+## What was checked, and how
+
+Scripts, not people, check most of the work. Every number in the docs must have a row
+in [CLAIMS.md](CLAIMS.md) that matches a committed report, and two tests rerun the
+backtest and the scenario check and compare them with the committed reports. No second
+person has reviewed the code. Iliya to write: what you read or checked yourself.
