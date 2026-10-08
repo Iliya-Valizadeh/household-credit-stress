@@ -73,6 +73,7 @@ The full list is in [docs/whats_weak.md](docs/whats_weak.md).
 | `ledger/` | The append-only live forecast and outcome rows (docs/eval_plan.md) |
 | `Makefile` | One command for each step: setup, lint, test, eval, demo |
 | `reports/` | Generated results, including metrics.json |
+| `site/` | The static page for GitHub Pages and the JSON files `site_data.py` exports for it |
 | `src/` | The package code |
 | `tests/` | Unit and data tests |
 | `tools/` | Checks for claims, readability, AI-writing signs and links |
