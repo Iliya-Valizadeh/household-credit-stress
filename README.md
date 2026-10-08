@@ -1,13 +1,14 @@
 # household-credit-stress
 
-A stress test for Canadian household mortgage debt that refreshes from public data each month and grades its own arrears forecasts in the open.
+A stress test for Canadian household mortgage debt, built to refresh from public data every week and grade its own arrears forecasts in the open.
 
 ## In plain words
 
 Each month this tool reads the mortgage rate, the jobless rate, and how many Canadian
 mortgages are behind on payments, one region at a time. It guesses next month's
 numbers before the bank group that tracks them does, then checks its own guess once
-the real numbers come out, where anyone can see it. You can also move sliders for the
+the real numbers come out, where anyone can see it. The first guesses were made in
+October 2026, and none has been checked yet. You can also move sliders for the
 rate and job losses to see how arrears might shift over the next two years. That part
 is a picture of "what if", not a number to plan around.
 
@@ -30,7 +31,9 @@ The one- and three-month model (`arx`, [ADR 0003](docs/decisions/0003-arrears-mo
 does not beat the simplest [baseline](docs/glossary.md#baseline) it was built to beat.
 Against AR(1), its test-period [mean absolute error](docs/glossary.md#mean-absolute-error)
 is worse by 0.03 bp one month ahead and by 0.17 bp three months ahead, and both ranges cover zero: -0.01 to 0.12 bp, and -0.03 to 0.54 bp, at a 95% confidence level. <!-- not-a-claim -->
-See [CLAIMS.md](CLAIMS.md) for where each number comes from.
+These are [backtest](docs/glossary.md#backtest) numbers on the latest
+[vintage](docs/glossary.md#vintage) of the data, not the numbers a forecaster saw at the
+time. See [CLAIMS.md](CLAIMS.md) for where each number comes from.
 
 ![Each model's test MAE in basis points, as a dot, with its interval as a
 line.](reports/figures/mae_arx_vs_baseline.png)
@@ -64,7 +67,7 @@ flowchart LR
     F --> H["site_data.py (site/)"]
 ```
 
-`refresh.py` pulls the three public sources every month and writes the processed CSV
+`refresh.py` checks the three public sources every week (each publishes monthly) and writes the processed CSV
 files plus a status file that flags stale data. `features.py`
 builds one row per region and month, with every driver lagged to what a forecaster
 could have known on that date. `arrears_model.py`'s `arx` equation makes the one- and
@@ -79,7 +82,9 @@ to turn a user's rate and unemployment path into an illustrative two-year arrear
 The two biggest weaknesses: `arx` does not beat AR(1) at one and three months (see
 "Result" above), and the scenario engine's own twelve- and twenty-four-month check
 against AR(1) also fails, so every scenario is shown as "Illustrative: not a forecast",
-never as a conditional forecast. The full ranked list, including why history before
+never as a conditional forecast. There is also no live record yet: the repo is not
+on GitHub, so the weekly refresh has never run and no ledger forecast is graded. The
+full ranked list, including why history before
 this repo's own archive is visible only as its latest revision, is in
 [docs/whats_weak.md](docs/whats_weak.md).
 

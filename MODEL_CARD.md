@@ -68,6 +68,9 @@ only as the latest published [vintage](docs/glossary.md#vintage); see
 
 ## Results
 
+Every result in this section is a backtest on the latest vintage of the data, not on the numbers a
+forecaster saw at the time. The live ledger, which avoids this, has no graded rows yet.
+
 `arx` against AR(1), the better baseline at both horizons: the test MAE gap is 0.03 bp
 one month ahead (interval -0.01 to 0.12 bp) and 0.17 bp three months ahead (interval
 -0.03 to 0.54 bp), both at the 95% level. Both intervals include zero, so there is no <!-- not-a-claim -->
@@ -84,7 +87,8 @@ Fitted by region, `arx`'s own driver slopes are unstable: at the last fitted ori
 mortgage rate slope is negative for ATL and MB, the opposite of the expected sign
 (`reports/metrics.json#model.coefficients_last_origin`). This is why `pooled_arx`
 shares one pair of slopes across all seven regions instead of fitting one set per
-region.
+region. Three months ahead, `arx` also does more than a tenth worse than persistence in
+QC and AB (`docs/whats_weak.md`, row 6).
 
 ## Ethical considerations
 
