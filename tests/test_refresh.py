@@ -98,5 +98,17 @@ def test_default_pullers_call_the_sources(monkeypatch: pytest.MonkeyPatch, tmp_p
         "download_latest",
         lambda d: (arrears(d), pd.Timestamp("2026-07-01"), d / "2026-07.xlsx"),
     )
+    monkeypatch.setattr(
+        statcan,
+        "fetch_labour_force",
+        lambda: pd.DataFrame(
+            {
+                "month": pd.to_datetime(["2026-09-01"]),
+                "region": ["NL"],
+                "unemployed": [10.0],
+                "labour_force": [100.0],
+            }
+        ),
+    )
     status = run(tmp_path, refresh.PULLERS)
     assert all(entry["ok"] for entry in status.values())

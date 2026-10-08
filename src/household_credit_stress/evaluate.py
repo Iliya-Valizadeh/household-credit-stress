@@ -1,12 +1,9 @@
-"""Evaluation for `make eval`. It writes reports/metrics.json and the headline chart.
+"""Evaluation for `make eval`. Writes `reports/backtest.csv` and `reports/metrics.json`.
 
-The template ships a small worked example so every new repo runs end to end on day
-one. It makes synthetic data, fits a mean baseline and a linear model, and reports
-each one's mean absolute error with a 95% bootstrap interval. It also reports the gap
-between them with a paired bootstrap interval.
-
-Replace this with the evaluation in docs/eval_plan.md. Every number the docs quote
-must come from the file this script writes.
+Runs the backtest harness in `backtest.py` on the real processed data, under the
+expanding-window design in `docs/eval_plan.md`. As of this task, `metrics.json` holds
+only the two baselines (persistence and AR(1)); T05 adds the model's own rows once
+there is a model to score, and its one chart.
 """
 
 from __future__ import annotations
@@ -16,88 +13,47 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .data import make_dataset, train_test_split
-from .metrics import Estimate, bootstrap_mae, bootstrap_mae_gap
-from .models import LinearModel, MeanBaseline
+import pandas as pd
 
-SEED = 7
-N_ROWS = 1000
-TEST_FRACTION = 0.2
-N_RESAMPLES = 2000
-LEVEL = 0.95
-DECIMALS = 4
+from . import backtest
 
 METRICS_FILE = "metrics.json"
-CHART_FILE = "figures/mae_by_model.png"
+BACKTEST_FILE = "backtest.csv"
 
 
-def _rounded(est: Estimate) -> dict[str, float]:
-    return {
-        "value": round(est.value, DECIMALS),
-        "ci_low": round(est.ci_low, DECIMALS),
-        "ci_high": round(est.ci_high, DECIMALS),
-    }
+def run_evaluation(data_dir: Path = Path("data")) -> tuple[dict[str, Any], pd.DataFrame]:
+    """Run the whole backtest. Returns the metrics dict and the backtest rows."""
+    panel = backtest.load_panel(data_dir)
+    last_month = pd.Timestamp(panel["month"].max())
+    origins = pd.date_range(backtest.DEV_START, last_month, freq="MS")
+    rows = backtest.run_backtest(panel, origins)
+    metrics = backtest.summarize(rows)
+    return metrics, rows
 
 
-def run_evaluation() -> tuple[dict[str, Any], dict[str, Estimate]]:
-    """Run the whole evaluation. Returns the metrics dict and the raw estimates."""
-    x, y = make_dataset(N_ROWS, seed=SEED)
-    split = train_test_split(x, y, TEST_FRACTION, seed=SEED + 1)
-
-    baseline = MeanBaseline().fit(split.x_train, split.y_train)
-    model = LinearModel().fit(split.x_train, split.y_train)
-    pred_base = baseline.predict(split.x_test)
-    pred_model = model.predict(split.x_test)
-
-    boot_seed = SEED + 2
-    estimates = {
-        "baseline": bootstrap_mae(split.y_test, pred_base, N_RESAMPLES, LEVEL, boot_seed),
-        "model": bootstrap_mae(split.y_test, pred_model, N_RESAMPLES, LEVEL, boot_seed),
-        "mae_gap": bootstrap_mae_gap(
-            split.y_test, pred_base, pred_model, N_RESAMPLES, LEVEL, boot_seed
-        ),
-    }
-    metrics: dict[str, Any] = {
-        "about": "Template demo on synthetic data. Replace with your real evaluation.",
-        "seed": SEED,
-        "n_train": len(split.y_train),
-        "n_test": len(split.y_test),
-        "metric": "mean_absolute_error",
-        "interval": {"method": "percentile_bootstrap", "resamples": N_RESAMPLES, "level": LEVEL},
-        "baseline": {"name": MeanBaseline.name, **_rounded(estimates["baseline"])},
-        "model": {"name": LinearModel.name, **_rounded(estimates["model"])},
-        "mae_gap": _rounded(estimates["mae_gap"]),
-    }
-    return metrics, estimates
-
-
-def write_reports(reports_dir: Path) -> dict[str, Any]:
-    """Run the evaluation and write metrics.json and the chart under `reports_dir`."""
-    from .plots import MUTED, SERIES_1, plot_mae
-
-    metrics, est = run_evaluation()
+def write_reports(reports_dir: Path, data_dir: Path = Path("data")) -> dict[str, Any]:
+    """Run the evaluation and write `backtest.csv` and `metrics.json` under `reports_dir`."""
+    metrics, rows = run_evaluation(data_dir)
     reports_dir.mkdir(parents=True, exist_ok=True)
-    text = json.dumps(metrics, indent=2) + "\n"
+    rows.to_csv(reports_dir / BACKTEST_FILE, index=False, date_format="%Y-%m-%d")
     # Always LF, so a run on Windows writes the same bytes as a run on Linux.
+    text = json.dumps(metrics, indent=2) + "\n"
     (reports_dir / METRICS_FILE).write_text(text, encoding="utf-8", newline="\n")
-    plot_mae(
-        [
-            ("Baseline: training mean", est["baseline"], MUTED),
-            ("Linear model", est["model"], SERIES_1),
-        ],
-        n_test=metrics["n_test"],
-        path=reports_dir / CHART_FILE,
-    )
     return metrics
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0] if __doc__ else "")
     parser.add_argument("--reports-dir", type=Path, default=Path("reports"))
+    parser.add_argument("--data-dir", type=Path, default=Path("data"))
     args = parser.parse_args(argv)
-    metrics = write_reports(args.reports_dir)
-    print(f"Wrote {args.reports_dir / METRICS_FILE} and {args.reports_dir / CHART_FILE}")
-    print(f"Model MAE {metrics['model']['value']}, baseline MAE {metrics['baseline']['value']}")
+    metrics = write_reports(args.reports_dir, args.data_dir)
+    print(f"Wrote {args.reports_dir / BACKTEST_FILE} and {args.reports_dir / METRICS_FILE}")
+    for model in backtest.MODELS:
+        for h in backtest.HORIZONS:
+            test = metrics["baselines"][model][f"h{h}"]["test"]
+            if test is not None:
+                print(f"{model} h{h} test MAE: {test['mae_bp']['value']} bp")
     return 0
 
 
