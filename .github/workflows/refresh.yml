@@ -1,0 +1,49 @@
+name: Refresh data
+
+# Pulls the latest public data every Monday and commits it when something changed.
+# A source that fails is marked stale in data/status.json and shows a warning on the
+# run, but the run itself passes, so a publisher's site change does not send a failure
+# email every week (see docs/decisions/0001-refresh-and-stale-data.md).
+
+on:
+  schedule:
+    - cron: "23 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install pinned packages
+        run: uv sync --locked
+
+      - name: Pull the latest data
+        run: uv run python -m household_credit_stress.refresh
+
+      - name: Commit new data, if any
+        run: |
+          git add data/
+          # status.json changes on every run (its check time), so only commit when a
+          # data file itself changed.
+          if git diff --cached --quiet -- data/processed data/raw; then
+            echo "No new data."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Refresh data ($(date -u +%Y-%m-%d))"
+          git push
