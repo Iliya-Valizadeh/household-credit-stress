@@ -51,7 +51,7 @@ In total, eight tests earn half a point each. The other tests earn nothing.
 | 1 | Feature expectations are captured in a schema | none | The parsers in `sources/` reject an empty or failed reply, but no schema lists types or allowed ranges for the processed CSV files |
 | 2 | All features are beneficial | none | The two drivers are only tested together, as `arx` against AR(1). That test finds no clear gain at one and three months (`reports/metrics.json`), and no test drops one driver at a time |
 | 3 | No feature's cost is too much | none | Not measured |
-| 4 | Features adhere to meta-level requirements | half | The point-in-time rule in [the evaluation plan](eval_plan.md) is tested: a feature from after the cutoff raises (`tests/test_backtest.py`). The terms of use of the three data sources are not recorded in the repo |
+| 4 | Features adhere to meta-level requirements | half | The point-in-time rule in [the evaluation plan](eval_plan.md) is tested: a feature from after the cutoff raises (`tests/test_backtest.py`). The three data sources' terms of use are now recorded in the README's [Data notes](../README.md#data-notes): the Bank of Canada and Statistics Canada licences allow redistribution with attribution, but the CBA's terms do not say whether archiving its spreadsheet counts as permitted copying, which is open under "Needs Iliya" |
 | 5 | The data pipeline has appropriate privacy controls | none | The data are public regional totals with no personal data, and there is no privacy control |
 | 6 | New features can be added quickly | none | Not measured |
 | 7 | All input feature code is tested | half | `tests/test_features.py` covers the lag rules and the Atlantic aggregation, and `tests/test_sources.py` covers each parser on saved replies |
