@@ -18,11 +18,15 @@ from typing import Any
 
 import pandas as pd
 
-from . import backtest, scenario
+from . import __version__, backtest, run_log, scenario
 
 BACKTEST_FILE = "scenario_backtest.csv"
 METRICS_FILE = "scenario_metrics.json"
 PRESETS_FILE = "scenario_presets.json"
+# The headline check horizon for the run log (docs/eval_plan.md, "Backtest design"):
+# the nearer of the two check horizons, the same convention as evaluate.py's
+# HEADLINE_HORIZON.
+HEADLINE_HORIZON = scenario.CHECK_HORIZONS[0]
 
 
 def run_scenario_evaluation(data_dir: Path = Path("data")) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -80,6 +84,17 @@ def _presets_payload(data_dir: Path) -> dict[str, Any]:
     }
 
 
+def headline_gap_bp(metrics: dict[str, Any]) -> float | None:
+    """The model-minus-best-baseline MAE gap at `HEADLINE_HORIZON`, for the run log
+    (docs/eval_plan.md, "Backtest design"). `None` if there was not yet enough
+    test-period data to score the model at that horizon."""
+    result = metrics["check"].get(f"h{HEADLINE_HORIZON}")
+    if result is None:
+        return None
+    gap = result["gap_bp"]["value"]
+    return float(gap) if gap is not None else None
+
+
 def committed_backtest_rows(rows: pd.DataFrame) -> pd.DataFrame:
     """The rows written to `reports/scenario_backtest.csv`: only the two horizons the
     verdict actually scores (h=12, h=24), not the full h=1..24 grid `run_scenario_evaluation`
@@ -110,6 +125,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     args = parser.parse_args(argv)
     metrics = write_reports(args.reports_dir, args.data_dir)
+    run_log.append_run(
+        args.reports_dir,
+        scenario.MODEL_NAME,
+        __version__,
+        run_log.current_git_hash(),
+        headline_gap_bp(metrics),
+    )
     print(
         f"Wrote {args.reports_dir / BACKTEST_FILE}, {args.reports_dir / METRICS_FILE} "
         f"and {args.reports_dir / PRESETS_FILE}"

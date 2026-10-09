@@ -245,6 +245,16 @@ Reporting the live record:
 
 ## Changes to this plan
 
+### 2026-10-08: the test-run log starts late
+
+`reports/test_runs.csv` exists from this date on. `evaluate.py` and
+`evaluate_scenario.py` each append one row per run: model, version, git hash, UTC time,
+and that script's headline test MAE gap. Every run from here on is visible, including
+one that changes nothing. Runs before this date are not in the log; the only record of
+them is the git history of `reports/metrics.json` and `reports/scenario_metrics.json`,
+which shows when each file last changed but not how many times a run was tried without
+changing it.
+
 ### 2026-10-08: a scenario check at twelve and twenty-four months
 
 Why: the one and three month test above cannot show how arrears respond to

@@ -16,7 +16,7 @@ from typing import Any
 
 import pandas as pd
 
-from . import backtest, plots
+from . import __version__, backtest, plots, run_log
 from .metrics import Estimate
 
 METRICS_FILE = "metrics.json"
@@ -38,6 +38,17 @@ def run_evaluation(data_dir: Path = Path("data")) -> tuple[dict[str, Any], pd.Da
         "by_region": backtest.coefficients_at_cutoff(panel, last_month),
     }
     return metrics, rows
+
+
+def headline_gap_bp(metrics: dict[str, Any]) -> float | None:
+    """The model-minus-best-baseline test MAE gap at `HEADLINE_HORIZON`, for the
+    run log (docs/eval_plan.md, "Backtest design"). `None` if there was not yet
+    enough test-period data to score the model at that horizon."""
+    comparison = metrics["model"][f"h{HEADLINE_HORIZON}"]
+    if comparison is None:
+        return None
+    gap = comparison["gap_bp"]["value"]
+    return float(gap) if gap is not None else None
 
 
 def _write_headline_chart(metrics: dict[str, Any], reports_dir: Path) -> None:
@@ -75,6 +86,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
     args = parser.parse_args(argv)
     metrics = write_reports(args.reports_dir, args.data_dir)
+    run_log.append_run(
+        args.reports_dir,
+        backtest.MODEL_NAME,
+        __version__,
+        run_log.current_git_hash(),
+        headline_gap_bp(metrics),
+    )
     print(f"Wrote {args.reports_dir / BACKTEST_FILE} and {args.reports_dir / METRICS_FILE}")
     for model in backtest.MODELS:
         for h in backtest.HORIZONS:
