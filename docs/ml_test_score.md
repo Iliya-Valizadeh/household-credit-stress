@@ -87,7 +87,7 @@ In total, eight tests earn half a point each. The other tests earn nothing.
 | 1 | Dependency changes result in notification | none | Versions are pinned in `uv.lock`, but nothing reports new releases |
 | 2 | Data invariants hold for inputs | none | A failed fetch marks its source stale in `data/status.json` (tested in `tests/test_refresh.py`), but no check runs on the values themselves |
 | 3 | Training and serving are not skewed | none | `forecast.py` builds its inputs with the same `features.py` code as the backtest, but no test compares the two |
-| 4 | Models are not too stale | none | `data/status.json` flags old data, but the refresh has never run on a schedule, and the page's copy in `site/data/` is only updated by hand |
+| 4 | Models are not too stale | none | `data/status.json` flags old data, and the weekly workflow now reruns `site_data.py` so the page's copy stays current and commits on an ok/stale flip (`.github/workflows/refresh.yml`, `tests/test_refresh_commit.py`), but the refresh has never run on a schedule, since the repo has no GitHub remote yet |
 | 5 | Models are numerically stable | none | Nothing checks for missing or infinite values in predictions |
 | 6 | Computing performance has not regressed | none | Speed and memory use are not measured |
 | 7 | Prediction quality has not regressed | none | `forecast.py` grades ledger rows once the CBA publishes them, but none is graded yet and nothing raises an alert |
