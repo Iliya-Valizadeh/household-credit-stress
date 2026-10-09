@@ -20,6 +20,8 @@ git tag.
   and the history presets.
 - The static web page in `site/`.
 - Docs to the house standard, and an ML Test Score self-assessment of the real system.
+- The append-only test-run log in `reports/test_runs.csv`, written by `evaluate.py` and
+  `evaluate_scenario.py` after every run.
 
 ### Removed
 
