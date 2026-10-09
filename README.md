@@ -41,6 +41,12 @@ line.](reports/figures/mae_arx_vs_baseline.png)
 `arx` sits to the right of AR(1) at both horizons, not to the left, so the chart shows
 the same result: more error, not less.
 
+Split by test period (also reported, not used for the verdict), the shortfall sits mainly
+in March 2020 to December 2021, when payment deferrals held arrears down: `arx`'s MAE is
+1.18 bp against AR(1)'s 1.00 bp one month ahead, and 3.21 bp against 2.38 bp three months
+ahead there, while the two models are close to even in the periods before and after
+(`CLAIMS.md`).
+
 ## How I worked
 
 - Evaluation plan, written before any results: [docs/eval_plan.md](docs/eval_plan.md)
