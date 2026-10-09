@@ -77,6 +77,30 @@ to turn a user's rate and unemployment path into an illustrative two-year arrear
 `site_data.py` exports the numbers both paths need as JSON, and the static page in
 `site/` adds them up itself.
 
+## Data notes
+
+This repo pulls from three public sources, each under its own terms.
+
+- Bank of Canada Valet API, source of the posted 5-year mortgage rate. The Bank's
+  [Terms of Use](https://www.bankofcanada.ca/terms/) let anyone freely use, copy,
+  distribute and transmit its content, provided the Bank of Canada is credited as the
+  source and any changes are noted. The Valet API also caps how often it can be
+  called; the weekly refresh stays well under that.
+- Statistics Canada, source of the unemployment rate. Covered by the
+  [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence):
+  a free, worldwide licence to use, reproduce, publish and redistribute the data,
+  commercial or not, as long as Statistics Canada is credited as the source.
+- The Canadian Bankers Association's "Mortgages in Arrears" spreadsheet, archived at
+  `data/raw/cba/`. The CBA's [Terms of Use](https://cba.ca/article/terms-of-use) let
+  anyone use or copy "Information" from its site if it is copied accurately, kept in
+  context, and credited to the CBA, and reserve commercial use of that Information to
+  CBA members. Neither clause says whether archiving a copy of the published file
+  itself, rather than citing numbers from it, counts as permitted copying. This repo
+  has archived one file so far under that open question
+  (`data/raw/cba/2026-07.xlsx`). See "Needs Iliya" in `_portfolio/STATUS.md`: before
+  this repo is public, Iliya should confirm with the CBA or replace the archive with
+  numbers only.
+
 ## What's weak
 
 The two biggest weaknesses: `arx` does not beat AR(1) at one and three months (see
