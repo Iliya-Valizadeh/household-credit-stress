@@ -52,6 +52,15 @@ DEV_START: Final = pd.Timestamp("2007-01-01")
 DEV_END: Final = pd.Timestamp("2016-12-01")
 TEST_START: Final = pd.Timestamp("2017-01-01")
 
+# "Metrics" in docs/eval_plan.md: the test period split into pre-pandemic, payment
+# deferrals, and after. Reported in `reports/metrics.json` but never used for the
+# verdict (label, start, end; end=None means open-ended).
+TEST_SUBPERIODS: Final = (
+    ("2017-01_2020-02", pd.Timestamp("2017-01-01"), pd.Timestamp("2020-02-01")),
+    ("2020-03_2021-12", pd.Timestamp("2020-03-01"), pd.Timestamp("2021-12-01")),
+    ("2022-01_on", pd.Timestamp("2022-01-01"), None),
+)
+
 # The MB/SK reporting adjustment: one monthly change is dropped when the AR(1)
 # baseline fits, per "Backtest design" in docs/eval_plan.md and ADR 0002.
 LEVEL_SHIFT_REGIONS: Final = ("MB", "SK")
@@ -345,6 +354,38 @@ def _pooled_summary(
     }
 
 
+def _pooled_summary_range(
+    backtest: pd.DataFrame,
+    model: str,
+    horizon: int,
+    start: pd.Timestamp,
+    end: pd.Timestamp | None,
+) -> dict[str, Any] | None:
+    """Pooled test MAE like `_pooled_summary`, but over the test origins in
+    `[start, end]` (`end=None` means open-ended), for the test-period split in
+    docs/eval_plan.md, "Metrics". Reported, never used for the verdict, so this skips
+    the interval-coverage fields `_pooled_summary` also computes."""
+    subset = backtest[
+        (backtest["model"] == model)
+        & (backtest["horizon"] == horizon)
+        & (backtest["period"] == "test")
+        & (backtest["region"].isin(PRIMARY_REGIONS))
+        & (backtest["origin_month"] >= start)
+    ]
+    if end is not None:
+        subset = subset[subset["origin_month"] <= end]
+    if subset.empty:
+        return None
+    errors = subset[["origin_month", "abs_error_bp"]].rename(
+        columns={"origin_month": "origin", "abs_error_bp": "abs_error"}
+    )
+    estimate = moving_block_bootstrap_mae(errors, BLOCK_MONTHS, N_RESAMPLES, CI_LEVEL, BOOT_SEED)
+    return {
+        "mae_bp": _rounded(estimate),
+        "n_origins": int(subset["origin_month"].nunique()),
+    }
+
+
 def _model_vs_baseline(
     backtest: pd.DataFrame, baselines: dict[str, Any], best_baseline: dict[str, str], horizon: int
 ) -> dict[str, Any] | None:
@@ -436,10 +477,12 @@ def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
     """`reports/metrics.json`: pooled MAE over the seven primary regions, by model
     and horizon, for the development and test periods in docs/eval_plan.md, with a
     moving-block bootstrap interval and the 80% interval's coverage. Also reported,
-    never used for the verdict: each region's own test MAE. `best_baseline` is the
-    lower-dev-MAE baseline at each horizon, chosen once from `BASELINE_MODELS`, per
-    "Baselines" in docs/eval_plan.md. `model` scores the ADR 0003 model (`MODEL_NAME`)
-    against that baseline, per "What counts as beating the baseline".
+    never used for the verdict: each region's own test MAE, and (`test_subperiods`)
+    the test period split into January 2017-February 2020, March 2020-December 2021
+    (payment deferrals) and January 2022 on. `best_baseline` is the lower-dev-MAE
+    baseline at each horizon, chosen once from `BASELINE_MODELS`, per "Baselines" in
+    docs/eval_plan.md. `model` scores the ADR 0003 model (`MODEL_NAME`) against that
+    baseline, per "What counts as beating the baseline".
     """
     baselines: dict[str, Any] = {}
     for model in MODELS:
@@ -474,6 +517,15 @@ def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
         f"h{h}": _model_vs_baseline(backtest, baselines, best_baseline, h) for h in HORIZONS
     }
 
+    test_subperiods: dict[str, Any] = {"note": "also reported, not used for the verdict"}
+    for label, start, end in TEST_SUBPERIODS:
+        test_subperiods[label] = {
+            model: {
+                f"h{h}": _pooled_summary_range(backtest, model, h, start, end) for h in HORIZONS
+            }
+            for model in MODELS
+        }
+
     test_end = f"{backtest['origin_month'].max():%Y-%m}" if not backtest.empty else None
     return {
         "about": (
@@ -500,4 +552,5 @@ def summarize(backtest: pd.DataFrame) -> dict[str, Any]:
         "baselines": baselines,
         "best_baseline": best_baseline,
         "model": {"name": MODEL_NAME, **model_summary},
+        "test_subperiods": test_subperiods,
     }

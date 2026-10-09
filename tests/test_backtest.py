@@ -255,11 +255,59 @@ def test_summarize_picks_the_lower_dev_mae_baseline() -> None:
     ] == pytest.approx(1.0)
 
 
+def test_summarize_splits_the_test_period_into_the_metrics_doc_subperiods() -> None:
+    """docs/eval_plan.md, "Metrics": test results split into Jan 2017-Feb 2020, the
+    payment-deferral window Mar 2020-Dec 2021, and Jan 2022 on. Checks the boundary
+    months land in the right bucket and that the open-ended third bucket reaches
+    past its start."""
+    buckets = [
+        ("2017-01_2020-02", ["2017-01-01", "2020-02-01"], 2.0),
+        ("2020-03_2021-12", ["2020-03-01", "2021-12-01"], 5.0),
+        ("2022-01_on", ["2022-01-01", "2025-06-01"], 8.0),
+    ]
+    rows = []
+    for _, origins, value in buckets:
+        for origin in pd.to_datetime(origins):
+            for region in backtest.PRIMARY_REGIONS:
+                for model in backtest.MODELS:
+                    for horizon in backtest.HORIZONS:
+                        rows.append(
+                            {
+                                "origin_month": origin,
+                                "target_month": origin + pd.DateOffset(months=horizon),
+                                "horizon": horizon,
+                                "region": region,
+                                "model": model,
+                                "forecast_bp": 0.0,
+                                "lo80_bp": -1.0,
+                                "hi80_bp": 1.0,
+                                "actual_bp": 0.0,
+                                "error_bp": 0.0,
+                                "abs_error_bp": value,
+                                "period": "test",
+                            }
+                        )
+    rows_df = pd.DataFrame(rows)
+
+    summary = backtest.summarize(rows_df)
+    sub = summary["test_subperiods"]
+
+    assert sub["note"] == "also reported, not used for the verdict"
+    for label, origins, value in buckets:
+        for model in backtest.MODELS:
+            for horizon in backtest.HORIZONS:
+                cell = sub[label][model][f"h{horizon}"]
+                assert cell["mae_bp"]["value"] == pytest.approx(value)
+                assert cell["n_origins"] == len(origins)
+
+
 def test_summarize_handles_a_horizon_with_no_rows_yet() -> None:
     summary = backtest.summarize(pd.DataFrame(columns=backtest.BACKTEST_COLUMNS))
     assert summary["best_baseline"] == {}
     for model in backtest.MODELS:
         assert summary["baselines"][model]["h1"]["dev"] is None
+        for label, _, _ in backtest.TEST_SUBPERIODS:
+            assert summary["test_subperiods"][label][model]["h1"] is None
 
 
 # Reproducibility ----------------------------------------------------------------------------

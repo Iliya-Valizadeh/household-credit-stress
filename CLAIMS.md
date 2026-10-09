@@ -25,6 +25,10 @@ one line by hand, add the comment `<!-- not-a-claim -->` to it.
 | Persistence test MAE in QC, 3 months ahead | 1.22 bp | `reports/metrics.json#baselines.persistence.h3.by_region_test_mae_bp.QC` | `make eval` |
 | arx test MAE in AB, 3 months ahead | 1.95 bp | `reports/metrics.json#baselines.arx.h3.by_region_test_mae_bp.AB` | `make eval` |
 | Persistence test MAE in AB, 3 months ahead | 1.62 bp | `reports/metrics.json#baselines.persistence.h3.by_region_test_mae_bp.AB` | `make eval` |
+| arx test MAE in the payment-deferral period (March 2020-December 2021), 1 month ahead | 1.18 bp | `reports/metrics.json#test_subperiods.2020-03_2021-12.arx.h1.mae_bp.value` | `make eval` |
+| AR(1) test MAE in the payment-deferral period, 1 month ahead | 1.00 bp | `reports/metrics.json#test_subperiods.2020-03_2021-12.ar1.h1.mae_bp.value` | `make eval` |
+| arx test MAE in the payment-deferral period, 3 months ahead | 3.21 bp | `reports/metrics.json#test_subperiods.2020-03_2021-12.arx.h3.mae_bp.value` | `make eval` |
+| AR(1) test MAE in the payment-deferral period, 3 months ahead | 2.38 bp | `reports/metrics.json#test_subperiods.2020-03_2021-12.ar1.h3.mae_bp.value` | `make eval` |
 
 Example row, for the format only:
 `| Test AUC | 0.58 (0.55 to 0.61) | reports/metrics.json#auc | make eval |`
