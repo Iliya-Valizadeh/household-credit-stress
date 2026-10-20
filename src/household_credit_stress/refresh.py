@@ -12,8 +12,9 @@ Run with `python -m household_credit_stress.refresh`. It writes:
 A source that fails keeps its previous CSV and is marked stale in `status.json`. The run
 still exits 0, so a publisher changing its site does not send a failure email every
 week. The scheduled workflow prints a warning instead, and anything that shows results
-reads `status.json` and labels stale data as stale. Pass `--strict` to exit 1 when any
-source fails.
+reads `status.json` and labels stale data as stale. An unexpected error outside a single
+source is also printed as a warning, with exit 0. Pass `--strict` to exit 1 (or raise)
+when any source fails.
 """
 
 from __future__ import annotations
@@ -128,7 +129,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--strict", action="store_true", help="exit 1 if any source fails")
     args = parser.parse_args(argv)
 
-    statuses = refresh(args.data_dir)
+    try:
+        statuses = refresh(args.data_dir)
+    except Exception as error:  # noqa: BLE001  a scheduled run must not fail on a surprise
+        if args.strict:
+            raise
+        # refresh() already handles a failing source. This catches anything else, such as
+        # an unreadable status.json. The old files stay and keep their stale labels.
+        print(f"::warning title=Refresh crashed::{type(error).__name__}: {error}")
+        return 0
     for name, s in statuses.items():
         line = f"{name}: latest {s.latest_month}, ok={s.ok}, stale={s.stale}"
         print(line if not s.error else f"{line} ({s.error})")
