@@ -85,6 +85,16 @@ def test_main_exits_zero_unless_strict(
     assert refresh.main(["--data-dir", str(tmp_path), "--strict"]) == 1
 
 
+def test_unexpected_crash_is_a_warning_unless_strict(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    (tmp_path / "status.json").write_text("{not json")  # refresh() cannot read this
+    assert refresh.main(["--data-dir", str(tmp_path)]) == 0
+    assert "::warning title=Refresh crashed" in capsys.readouterr().out
+    with pytest.raises(json.JSONDecodeError):
+        refresh.main(["--data-dir", str(tmp_path), "--strict"])
+
+
 def test_months_between() -> None:
     assert refresh.months_between(pd.Timestamp("2025-11-01"), pd.Timestamp("2026-02-01")) == 3
 
