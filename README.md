@@ -96,16 +96,16 @@ This repo pulls from three public sources, each under its own terms.
   [Statistics Canada Open Licence](https://www.statcan.gc.ca/en/reference/licence):
   a free, worldwide licence to use, reproduce, publish and redistribute the data,
   commercial or not, as long as Statistics Canada is credited as the source.
-- The Canadian Bankers Association's "Mortgages in Arrears" spreadsheet, archived at
-  `data/raw/cba/`. The CBA's [Terms of Use](https://cba.ca/article/terms-of-use) let
-  anyone use or copy "Information" from its site if it is copied accurately, kept in
-  context, and credited to the CBA, and reserve commercial use of that Information to
-  CBA members. Neither clause says whether archiving a copy of the published file
-  itself, rather than citing numbers from it, counts as permitted copying. This repo
-  has archived one file so far under that open question
-  (`data/raw/cba/2026-07.xlsx`). See "Needs Iliya" in `_portfolio/STATUS.md`: before
-  this repo is public, Iliya should confirm with the CBA or replace the archive with
-  numbers only.
+- The Canadian Bankers Association (CBA), source of mortgage arrears. The CBA posts a
+  spreadsheet, "Number of Residential Mortgages in Arrears", each month at
+  [cba.ca](https://cba.ca/article/mortgages-in-arrears). The CBA's
+  [Terms of Use](https://cba.ca/article/terms-of-use) let anyone copy "Information"
+  from its site if it is copied accurately, kept in context and credited to the CBA,
+  and reserve commercial use of that Information to CBA members. They do not say whether the spreadsheet file itself may be shared. So this repo keeps
+  only the numbers: `data/raw/cba/YYYY-MM.csv` holds the month, region, number of
+  mortgages and number in arrears from each month's file, under a header that credits
+  the CBA and gives the page address and download time. The spreadsheets are not in
+  the repo or its history ([ADR 0006](docs/decisions/0006-cba-numbers-only.md)).
 
 ## What's weak
 

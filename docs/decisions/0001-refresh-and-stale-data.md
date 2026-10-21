@@ -1,6 +1,6 @@
 # 0001: Refresh from live sources and label stale data
 
-Date: 2026-10-07. Status: accepted.
+Date: 2026-10-07. Status: accepted. The first consequence (what the CBA archive keeps) is partly replaced by [ADR 0006](0006-cba-numbers-only.md): the archive now keeps each file's numbers, not the file.
 
 ## Context
 
