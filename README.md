@@ -50,7 +50,7 @@ ahead there, while the two models are close to even in the periods before and af
 ## How I worked
 
 - Evaluation plan, written before any results: [docs/eval_plan.md](docs/eval_plan.md)
-  (commit `bc8acfd`).
+  (commit `4c4e1c7`).
 - Decision records: [docs/decisions/](docs/decisions/).
 - Error analysis: the per-region slope instability and the no-clear-difference result
   that led to pooling the drivers for the scenario engine, in
