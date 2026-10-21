@@ -199,14 +199,14 @@ def test_grade_outcomes_grades_once_the_archive_file_exists(tmp_path: Path) -> N
     _write_processed_arrears(data_dir, [("2026-09-01", "CA", 1000, 7)])
     cba_dir = data_dir / "raw" / "cba"
     cba_dir.mkdir(parents=True)
-    (cba_dir / "2026-09.xlsx").write_bytes(b"")
+    (cba_dir / "2026-09.csv").write_text("")
 
     now = dt.datetime(2026, 11, 1, tzinfo=dt.UTC)
     added = forecast.grade_outcomes(data_dir, ledger_dir, now=now)
     assert added == 1
     outcomes = pd.read_csv(ledger_dir / "outcomes.csv")
     assert outcomes.loc[0, "actual_bp"] == pytest.approx(70.0)
-    assert outcomes.loc[0, "cba_file"] == "data/raw/cba/2026-09.xlsx"
+    assert outcomes.loc[0, "cba_file"] == "data/raw/cba/2026-09.csv"
 
 
 def test_grade_outcomes_leaves_a_target_ungraded_without_the_archive_file(
@@ -216,7 +216,7 @@ def test_grade_outcomes_leaves_a_target_ungraded_without_the_archive_file(
     ledger_dir = tmp_path / "ledger"
     _write_ledger(ledger_dir, [_row("2026-08", "2026-09", 1)])
     _write_processed_arrears(data_dir, [("2026-09-01", "CA", 1000, 7)])
-    # No data/raw/cba/2026-09.xlsx: the CBA has not published that month yet.
+    # No data/raw/cba/2026-09.csv: the CBA has not published that month yet.
 
     added = forecast.grade_outcomes(data_dir, ledger_dir)
     assert added == 0
@@ -230,7 +230,7 @@ def test_grade_outcomes_never_regrades_a_target(tmp_path: Path) -> None:
     _write_processed_arrears(data_dir, [("2026-09-01", "CA", 1000, 7)])
     cba_dir = data_dir / "raw" / "cba"
     cba_dir.mkdir(parents=True)
-    (cba_dir / "2026-09.xlsx").write_bytes(b"")
+    (cba_dir / "2026-09.csv").write_text("")
 
     forecast.grade_outcomes(data_dir, ledger_dir)
     before = (ledger_dir / "outcomes.csv").read_text(encoding="utf-8")

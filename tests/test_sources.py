@@ -258,7 +258,9 @@ def test_parse_workbook_fails_when_a_sheet_is_missing() -> None:
         cba.parse_workbook(make_cba_workbook(sheets=sheets))
 
 
-def test_download_latest_keeps_a_copy(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_download_latest_keeps_only_the_numbers(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     workbook = make_cba_workbook()
 
     def fake_get(url: str, body: bytes | None = None, content_type: str | None = None) -> bytes:
@@ -270,9 +272,61 @@ def test_download_latest_keeps_a_copy(monkeypatch: pytest.MonkeyPatch, tmp_path:
     monkeypatch.setattr(cba, "get_bytes", fake_get)
     frame, month, saved = cba.download_latest(tmp_path / "cba")
     assert month == pd.Timestamp("2026-07-01")
-    assert saved == tmp_path / "cba" / "2026-07.xlsx"
-    assert saved.read_bytes() == workbook
-    assert not frame.empty
+    assert saved == tmp_path / "cba" / "2026-07.csv"
+    assert [p.name for p in (tmp_path / "cba").iterdir()] == ["2026-07.csv"]
+    pd.testing.assert_frame_equal(cba.read_numbers_csv(saved), frame)
+
+
+def test_numbers_csv_credits_the_cba_and_keeps_only_the_counts(tmp_path: Path) -> None:
+    frame, _, saved = cba.write_numbers_csv(
+        make_cba_workbook(), tmp_path, "2026-10-08T02:39:35+00:00"
+    )
+    text = saved.read_text(encoding="utf-8")
+    header = [line for line in text.splitlines() if line.startswith("#")]
+    assert header[0].startswith('# Source: Canadian Bankers Association, "')
+    assert cba.TITLE in header[0]
+    joined = " ".join(header)
+    assert cba.PAGE_URL in joined
+    assert "Retrieved: 2026-10-08T02:39:35+00:00" in joined
+    assert "month ended July 2026" in joined
+    body = pd.read_csv(saved, comment="#")
+    assert list(body.columns) == cba.CSV_COLUMNS
+    assert "\r" not in saved.read_bytes().decode("utf-8")
+    pd.testing.assert_frame_equal(cba.read_numbers_csv(saved), frame)
+
+
+def test_numbers_csv_is_never_overwritten(tmp_path: Path) -> None:
+    _, _, saved = cba.write_numbers_csv(make_cba_workbook(), tmp_path, "first")
+    cba.write_numbers_csv(make_cba_workbook(), tmp_path, "second")
+    assert "Retrieved: first." in saved.read_text(encoding="utf-8")
+
+
+def test_cba_main_converts_a_saved_spreadsheet(tmp_path: Path) -> None:
+    workbook = tmp_path / "in.xlsx"
+    workbook.write_bytes(make_cba_workbook())
+    out = tmp_path / "archive"
+    code = cba.main([str(workbook), "--retrieved-at", "2026-10-08", "--archive-dir", str(out)])
+    assert code == 0
+    assert (out / "2026-07.csv").exists()
+
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def test_committed_cba_archive_is_numbers_only() -> None:
+    files = sorted((REPO / "data" / "raw" / "cba").glob("*.csv"))
+    assert files, "the archive should hold at least the first CBA file's numbers"
+    for path in files:
+        first = path.read_text(encoding="utf-8").splitlines()[0]
+        assert first.startswith("# Source: Canadian Bankers Association"), path.name
+        frame = cba.read_numbers_csv(path)
+        assert list(frame.columns) == cba.CSV_COLUMNS
+        assert set(frame["region"]) == set(cba.SHEETS.values())
+
+
+def test_cba_spreadsheets_are_gitignored() -> None:
+    rules = (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert "data/raw/cba/*.xlsx" in rules
 
 
 # HTTP helper ----------------------------------------------------------------------

@@ -8,7 +8,7 @@ latest data. Two append-only files live under `ledger/`:
   opens the file in append mode, and skips a region/horizon the ledger already has a
   row for, so running it twice on the same data adds nothing new.
 - `ledger/outcomes.csv`: the actual rate for a forecast's target month, added once the
-  CBA archive holds the file that first reports it (`data/raw/cba/YYYY-MM.xlsx`), never
+  CBA archive holds the file that first reports it (`data/raw/cba/YYYY-MM.csv`), never
   before. A target with no archive file yet is left ungraded; the live page shows it as
   a late or missed slot, per docs/eval_plan.md.
 
@@ -209,10 +209,10 @@ def grade_outcomes(
 ) -> int:
     """Grade any ledger forecast whose target month now has a CBA archive file.
 
-    A target counts as reported only once `data/raw/cba/YYYY-MM.xlsx` for that month
-    exists: the archive keeps every file as published, named after the newest month it
-    reports, so that file is the first one to report its own month (docs/eval_plan.md,
-    "Live forecast ledger"). A target/region already graded is skipped."""
+    A target counts as reported only once `data/raw/cba/YYYY-MM.csv` for that month
+    exists: the archive keeps the numbers of every file as published, named after the
+    newest month it reports, so that file is the first one to report its own month
+    (docs/eval_plan.md, "Live forecast ledger"). A target/region already graded is skipped."""
     now = now or dt.datetime.now(dt.UTC)
     forecasts_path = ledger_dir / "forecasts.csv"
     if not forecasts_path.exists() or forecasts_path.stat().st_size == 0:
@@ -235,7 +235,7 @@ def grade_outcomes(
         if (target_month, region) in already_graded:
             continue
         target = pd.Timestamp(f"{target_month}-01")
-        archive_file = cba_dir / f"{target:%Y-%m}.xlsx"
+        archive_file = cba_dir / f"{target:%Y-%m}.csv"
         if not archive_file.exists():
             continue  # not yet reported by the CBA; stays a late/missed slot for now
         try:
@@ -251,7 +251,7 @@ def grade_outcomes(
                 "target_month": target_month,
                 "region": region,
                 "actual_bp": actual_bp,
-                "cba_file": f"data/raw/cba/{target:%Y-%m}.xlsx",
+                "cba_file": f"data/raw/cba/{target:%Y-%m}.csv",
                 "first_seen_at": first_seen_at,
             }
         )
