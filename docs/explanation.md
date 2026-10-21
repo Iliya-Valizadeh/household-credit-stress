@@ -31,3 +31,7 @@ month it forecasts. So the repo makes its forecasts in public and grades them la
 - The scenario engine ([ADR 0004](decisions/0004-scenarios.md)). It shares one pair of
   driver slopes across regions and runs two years ahead. The cost: it failed its own
   check, so every scenario is shown as an illustration, not a forecast.
+- Numbers only from the CBA ([ADR 0006](decisions/0006-cba-numbers-only.md)). The
+  repo keeps the counts from each CBA file, with a credit to the CBA, and not the
+  spreadsheet, because the CBA's terms do not say whether the file may be shared.
+  The cost: the CBA's own layout and notes are not kept.

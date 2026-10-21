@@ -23,6 +23,13 @@ git tag.
 - The append-only test-run log in `reports/test_runs.csv`, written by `evaluate.py` and
   `evaluate_scenario.py` after every run.
 
+### Changed
+
+- The CBA archive keeps only the numbers from each monthly file, as a CSV that
+  credits the CBA, not the spreadsheet itself (ADR 0006).
+
 ### Removed
 
 - The template's synthetic worked example.
+- The CBA spreadsheet `data/raw/cba/2026-07.xlsx`, from the repo and its history
+  (ADR 0006). Its numbers are in `data/raw/cba/2026-07.csv`.
