@@ -13,3 +13,6 @@ build/
 *.egg-info/
 .ipynb_checkpoints/
 .env
+
+# CBA spreadsheets are never committed: only their numbers, as CSV (ADR 0006).
+data/raw/cba/*.xlsx

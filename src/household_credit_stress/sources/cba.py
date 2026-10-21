@@ -2,14 +2,20 @@
 
 The CBA posts one spreadsheet each month at https://cba.ca/article/mortgages-in-arrears.
 Each new file holds the full monthly history since January 1995 for every region, and
-the CBA takes the old file down when it posts a new one. So the refresh keeps a copy of
-every file it downloads.
+the CBA takes the old file down when it posts a new one. So the refresh keeps the
+numbers from every file it downloads, as `data/raw/cba/YYYY-MM.csv`: the month, region,
+number of mortgages and number in arrears, with a header that credits the CBA. The
+spreadsheet itself is never stored in the repo (ADR 0006).
+
+To convert a spreadsheet you already have, run
+`python -m household_credit_stress.sources.cba FILE.xlsx --retrieved-at WHEN`.
 
 A mortgage is "in arrears" when payments are three or more months overdue.
 """
 
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import io
 import re
@@ -22,6 +28,9 @@ from household_credit_stress.sources.http import get_bytes
 
 PAGE_URL = "https://cba.ca/article/mortgages-in-arrears"
 SITE_ROOT = "https://cba.ca"
+TERMS_URL = "https://cba.ca/article/terms-of-use"
+TITLE = "Number of Residential Mortgages in Arrears"
+CSV_COLUMNS = ["month", "region", "mortgages", "arrears"]
 
 # Sheet name in the workbook -> short region code used in this repo.
 SHEETS = {
@@ -104,17 +113,72 @@ def parse_workbook(workbook_bytes: bytes) -> pd.DataFrame:
     return frame
 
 
-def download_latest(archive_dir: Path) -> tuple[pd.DataFrame, pd.Timestamp, Path]:
-    """Download the current spreadsheet, keep a copy, and return its parsed rows.
+def numbers_csv_text(frame: pd.DataFrame, month: pd.Timestamp, retrieved_at: str) -> str:
+    """The numbers-only archive file: a header that credits the CBA, then one row per
+    region and month with the two published counts. Nothing else from the spreadsheet
+    is kept."""
+    regions = ", ".join(f"{code} = {sheet}" for sheet, code in SHEETS.items())
+    header = [
+        f'# Source: Canadian Bankers Association, "{TITLE}",',
+        f"# month ended {month:%B %Y}. {PAGE_URL}",
+        f"# Retrieved: {retrieved_at}. Terms of use: {TERMS_URL}",
+        "# Numbers only: the number of mortgages and the number in arrears (three or more",
+        "# months overdue) as published by the CBA, one row per region and month. Dates are",
+        "# moved to the first of the month. The CBA spreadsheet itself is not stored here.",
+        f"# Region code = CBA sheet name: {regions}",
+    ]
+    body = frame[CSV_COLUMNS].to_csv(index=False, date_format="%Y-%m-%d", lineterminator="\n")
+    return "\n".join(header) + "\n" + body
 
-    The copy is saved as `<archive_dir>/YYYY-MM.xlsx`, named after the report month.
+
+def read_numbers_csv(path: Path) -> pd.DataFrame:
+    """Read a numbers-only archive file back into the rows `parse_workbook` returns."""
+    frame = pd.read_csv(path, comment="#", parse_dates=["month"])
+    return frame.astype({"mortgages": "int64", "arrears": "Int64"})[CSV_COLUMNS]
+
+
+def write_numbers_csv(
+    workbook_bytes: bytes, archive_dir: Path, retrieved_at: str
+) -> tuple[pd.DataFrame, pd.Timestamp, Path]:
+    """Parse a CBA spreadsheet and save its numbers as `<archive_dir>/YYYY-MM.csv`.
+
+    The file is named after the report month. An existing file is never overwritten,
+    so the first copy of each month's numbers is the one kept."""
+    month = report_month(workbook_bytes)
+    frame = parse_workbook(workbook_bytes)
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    saved = archive_dir / f"{month:%Y-%m}.csv"
+    if not saved.exists():
+        saved.write_bytes(numbers_csv_text(frame, month, retrieved_at).encode("utf-8"))
+    return frame, month, saved
+
+
+def download_latest(archive_dir: Path) -> tuple[pd.DataFrame, pd.Timestamp, Path]:
+    """Download the current spreadsheet, keep its numbers, and return its parsed rows.
+
+    The spreadsheet is held in memory only. Its numbers are saved as
+    `<archive_dir>/YYYY-MM.csv`, named after the report month.
     """
     page = get_bytes(PAGE_URL).decode("utf-8", errors="replace")
     workbook = get_bytes(find_xlsx_url(page))
-    month = report_month(workbook)
-    frame = parse_workbook(workbook)
-    archive_dir.mkdir(parents=True, exist_ok=True)
-    saved = archive_dir / f"{month:%Y-%m}.xlsx"
-    if not saved.exists():
-        saved.write_bytes(workbook)
-    return frame, month, saved
+    retrieved_at = dt.datetime.now(dt.UTC).isoformat(timespec="seconds")
+    return write_numbers_csv(workbook, archive_dir, retrieved_at)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Save the numbers from a CBA arrears spreadsheet as a numbers-only CSV."
+    )
+    parser.add_argument("workbook", type=Path, help="the CBA .xlsx file")
+    parser.add_argument(
+        "--retrieved-at", required=True, help="when the file was downloaded (ISO 8601, UTC)"
+    )
+    parser.add_argument("--archive-dir", type=Path, default=Path("data/raw/cba"))
+    args = parser.parse_args(argv)
+    _, _, saved = write_numbers_csv(args.workbook.read_bytes(), args.archive_dir, args.retrieved_at)
+    print(f"Wrote {saved}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

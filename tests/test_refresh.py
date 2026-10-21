@@ -106,7 +106,7 @@ def test_default_pullers_call_the_sources(monkeypatch: pytest.MonkeyPatch, tmp_p
     monkeypatch.setattr(
         cba,
         "download_latest",
-        lambda d: (arrears(d), pd.Timestamp("2026-07-01"), d / "2026-07.xlsx"),
+        lambda d: (arrears(d), pd.Timestamp("2026-07-01"), d / "2026-07.csv"),
     )
     monkeypatch.setattr(
         statcan,

@@ -67,8 +67,9 @@ jobs:
       - name: Decide whether to commit
         id: decide
         run: |
-          # New CBA spreadsheets stay in the runner's working tree only: forecast.py
-          # reads them to grade outcomes, but they are never committed (ADR 0005).
+          # The refresh saves only the numbers from a new CBA spreadsheet, as
+          # data/raw/cba/YYYY-MM.csv, and that CSV is committed. The spreadsheet is
+          # never written to disk; the .xlsx exclusion is a second guard (ADR 0006).
           git add data/ ':!data/raw/cba/*.xlsx' ledger/ site/data/
           # status.json's checked_at and error change on every run, so a plain git
           # diff on it would commit every week for no reason a reader cares about.
