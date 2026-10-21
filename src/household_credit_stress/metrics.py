@@ -11,8 +11,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+import pandas as pd
+from numpy.typing import NDArray
 
-from .data import Array
+Array = NDArray[np.float64]
 
 
 @dataclass(frozen=True)
@@ -74,3 +76,41 @@ def bootstrap_mae_gap(
     idx = rng.integers(0, len(diff), size=(n_resamples, len(diff)))
     value = mae(y_true, pred_baseline) - mae(y_true, pred_model)
     return _interval(diff[idx].mean(axis=1), value, level)
+
+
+def moving_block_bootstrap_mae(
+    errors: pd.DataFrame, block_months: int, n_resamples: int, level: float, seed: int
+) -> Estimate:
+    """MAE with a moving-block bootstrap interval over whole origin months.
+
+    `errors` has one row per region and origin month, with columns `origin` (a
+    `pandas.Timestamp`, one value per origin month) and `abs_error` (basis points).
+    Each resample draws blocks of `block_months` consecutive origin months, with all
+    of a month's regions kept together, until the resample has as many origin months
+    as the original. This follows "Intervals on the metrics" in docs/eval_plan.md: it
+    keeps the link between regions at the same origin, and keeps nearby origins (whose
+    forecasts can overlap, such as two 3-month-ahead forecasts 1 month apart) together
+    rather than resampling each one independently.
+    """
+    _check_bootstrap_args(n_resamples, level)
+    origins = np.sort(errors["origin"].unique())
+    n_origins = len(origins)
+    if n_origins == 0:
+        raise ValueError("errors must have at least one origin month")
+    by_origin = [
+        errors.loc[errors["origin"] == origin, "abs_error"].to_numpy() for origin in origins
+    ]
+    value = float(errors["abs_error"].mean())
+
+    block = min(block_months, n_origins)
+    n_blocks = -(-n_origins // block)  # ceil division: enough blocks to cover n_origins
+    n_starts = n_origins - block + 1
+
+    rng = np.random.default_rng(seed)
+    samples = np.empty(n_resamples)
+    for i in range(n_resamples):
+        starts = rng.integers(0, n_starts, size=n_blocks)
+        picked = [pos for start in starts for pos in range(start, start + block)][:n_origins]
+        values = np.concatenate([by_origin[pos] for pos in picked])
+        samples[i] = values.mean()
+    return _interval(samples, value, level)

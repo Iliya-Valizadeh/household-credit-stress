@@ -1,16 +1,18 @@
 # ML Test Score self-assessment
 
 This page scores this repo against the ML Test Score, a checklist from
-[Breck et al. (Google, 2017)][breck]. The scores below describe the worked example
-that came with the template. When you replace the example, score your own system
-again, and never give a point that the code does not earn.
+[Breck et al. (Google, 2017)][breck]. It scores the real system: the data refresh, the
+`arx` ledger model ([ADR 0003](decisions/0003-arrears-model.md)) and the `pooled_arx`
+scenario engine ([ADR 0004](decisions/0004-scenarios.md)). No point is given that the
+code does not earn.
 
 ## In plain words
 
 Google wrote a list of 28 tests for a machine learning system. <!-- not-a-claim -->
 A system should pass them before people rely on it.
-This page checks this repo against that list. The worked example scores zero, the
-lowest level. Its model is a toy, and nothing runs as a live service.
+This page checks this repo against that list. The repo scores zero, the lowest level.
+Many of the tests are done and written down, but nothing runs as a live service yet:
+the weekly data refresh has never run on GitHub, and no live forecast has been graded.
 
 ## How the scoring works
 
@@ -25,76 +27,75 @@ the four section scores, so one weak section pulls the whole system down. The pa
 reads an overall score of zero as closer to a research project than a production
 system.
 
-## What is scored
-
-The worked example makes synthetic data and fits a [baseline](glossary.md#baseline)
-that always predicts the training mean. It also fits a linear model. It reports the
-[mean absolute error](glossary.md#mean-absolute-error) of each, with a
-[bootstrap](glossary.md#bootstrap) [confidence interval](glossary.md#confidence-interval).
-The code is in `src/` and the tests are in `tests/test_pipeline.py`.
-
-The tests below count as done by hand until CI (continuous integration, the checks
-GitHub runs on every push) has run them. TODO: once CI passes on GitHub, move the
-tests that CI runs from half a point to one point.
+The repo has no GitHub remote yet, so CI (continuous integration, the checks GitHub
+runs on every push) has never run. Every test below that `pytest` covers therefore
+counts as done by hand. Once CI passes on GitHub, the tests that CI runs can move from
+half a point to one point.
 
 ## Summary
 
 | Section | Score out of 7 |
 |---|---|
-| Features and data | half a point |
-| Model development | half a point |
-| Infrastructure | one and a half points |
+| Features and data | one point |
+| Model development | one point |
+| Infrastructure | two points |
 | Monitoring | none |
 | Overall (the lowest section) | 0 |
 
-In total, five tests earn half a point each. The other tests earn nothing.
+In total, eight tests earn half a point each. The other tests earn nothing.
 
 ## Tests for features and data
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Feature expectations are captured in a schema | none | Tests check the number of rows and columns only. No schema lists types or allowed ranges |
-| 2 | All features are beneficial | none | Feature 2 has no effect on the target on purpose (`TRUE_COEFFICIENTS` in `data.py`). Nothing detects this |
+| 1 | Feature expectations are captured in a schema | none | The parsers in `sources/` reject an empty or failed reply, but no schema lists types or allowed ranges for the processed CSV files |
+| 2 | All features are beneficial | none | The two drivers are only tested together, as `arx` against AR(1). That test finds no clear gain at one and three months (`reports/metrics.json`), and no test drops one driver at a time |
 | 3 | No feature's cost is too much | none | Not measured |
-| 4 | Features adhere to meta-level requirements | none | The data is synthetic, so no outside rules apply yet. Nothing records or checks this |
-| 5 | The data pipeline has appropriate privacy controls | none | There is no personal data and no privacy control. Real data needs one |
+| 4 | Features adhere to meta-level requirements | half | The point-in-time rule in [the evaluation plan](eval_plan.md) is tested: a feature from after the cutoff raises (`tests/test_backtest.py`). The three data sources' terms of use are recorded in the README's [Data notes](../README.md#data-notes): the Bank of Canada and Statistics Canada licences allow redistribution with attribution. The CBA's terms allow accurate, credited copying of its information but do not say whether its spreadsheet may be shared, so the repo keeps only the CBA's numbers, with a credit header, and no spreadsheet ([ADR 0006](decisions/0006-cba-numbers-only.md)). `tests/test_sources.py` checks that each archived CBA file is numbers only and credits the CBA. No test checks the other terms |
+| 5 | The data pipeline has appropriate privacy controls | none | The data are public regional totals with no personal data, and there is no privacy control |
 | 6 | New features can be added quickly | none | Not measured |
-| 7 | All input feature code is tested | half | Tests cover `make_dataset` and `train_test_split`: fixed seeds, shapes and bad inputs |
+| 7 | All input feature code is tested | half | `tests/test_features.py` covers the lag rules and the Atlantic aggregation, and `tests/test_sources.py` covers each parser on saved replies |
 
 ## Tests for model development
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Model specs (the code that defines a model) are reviewed and checked in | none | The model code is in git, but no second person has reviewed it |
-| 2 | Offline and online metrics correlate | none | There is no online use |
-| 3 | All hyperparameters have been tuned | none | The linear model has no hyperparameters, and there is no tuning code for models that do |
-| 4 | The impact of model staleness is known | none | The synthetic data does not change over time, so this was not studied |
-| 5 | A simpler model is not better | half | `evaluate.py` fits the baseline next to the model and reports the gap in mean absolute error with a paired bootstrap interval. A test checks that the model beats the baseline |
-| 6 | Model quality is sufficient on important data slices | none | No slices are defined or reported |
-| 7 | The model is tested for considerations of inclusion | none | The synthetic data describes no people, and nothing checks this |
+| 1 | Model specs (the code that defines a model) are reviewed and checked in | none | Each model has an ADR committed before its code, and an AI review session checked them. No second person has reviewed them |
+| 2 | Offline and online metrics correlate | none | The live ledger holds one set of forecasts and none is graded yet, so there is nothing to compare with the [backtest](glossary.md#backtest) |
+| 3 | All hyperparameters have been tuned | none | Nothing is tuned, on purpose (ADR 0003). There is no tuning code |
+| 4 | The impact of model staleness is known | none | Both models are refit at every origin, and the effect of using an older fit was not studied |
+| 5 | A simpler model is not better | half | `evaluate.py` and `evaluate_scenario.py` compare each model with persistence and AR(1), with a paired [bootstrap](glossary.md#bootstrap) interval. The check runs and finds that the simpler AR(1) is not beaten, and the docs say so |
+| 6 | Model quality is sufficient on important data slices | half | `reports/metrics.json` reports test MAE by region, and `docs/whats_weak.md` lists the regions the evaluation plan's rule flags |
+| 7 | The model is tested for considerations of inclusion | none | The models describe regions, not people, and nothing checks this |
 
 ## Tests for infrastructure
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Training is reproducible | half | Every random step uses a fixed seed. A test reruns the evaluation and compares it with the committed `reports/metrics.json`. The CI workflow installs packages from the lockfile |
-| 2 | Model specs are unit tested | half | Tests check that the linear model recovers a known rule from data with no noise, that the baseline predicts the training mean, and that predicting before fitting fails |
-| 3 | The ML pipeline is integration tested | half | One test runs the whole evaluation, from data to `metrics.json` and the chart |
-| 4 | Model quality is validated before serving | none | There is no serving step |
-| 5 | The model is debuggable | none | There is no tool to follow one example through the model step by step |
-| 6 | Models are canaried before serving | none | There is no serving step |
-| 7 | Serving models can be rolled back | none | There is no serving step |
+| 1 | Training is reproducible | half | The bootstrap uses a fixed seed and packages come from the lockfile. Two tests rerun the backtest and the scenario check and compare them with the committed reports (`tests/test_backtest.py`, `tests/test_scenario.py`) |
+| 2 | Model specs are unit tested | half | `tests/test_arrears_model.py` and `tests/test_scenario.py` check that each fit recovers known slopes from exact data, a forward run worked out by hand, the sign rule and the deferral-month drop |
+| 3 | The ML pipeline is integration tested | half | The same two reproduction tests run the whole evaluation from `data/processed/` to the reports. The fetch step is tested only with saved replies |
+| 4 | Model quality is validated before serving | half | The scenario label on the page comes from the pre-registered check in `reports/scenario_metrics.json`, so a failed check shows "Illustrative: not a forecast". The ledger forecasts are written with no quality gate |
+| 5 | The model is debuggable | none | There is no tool to follow one forecast through the model step by step |
+| 6 | Models are canaried before serving | none | There is no staged release |
+| 7 | Serving models can be rolled back | none | Each ledger row records `model_version`, but there is no rollback step |
 
 ## Monitoring tests
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Dependency changes result in notification | none | Versions are pinned, but nothing reports new releases |
-| 2 | Data invariants hold for inputs | none | `train_test_split` rejects inputs of different lengths, but no schema check runs on the data |
-| 3 | Training and serving are not skewed | none | There is no serving step |
-| 4 | Models are not too stale | none | There is no serving step |
+| 1 | Dependency changes result in notification | none | Versions are pinned in `uv.lock`, but nothing reports new releases |
+| 2 | Data invariants hold for inputs | none | A failed fetch marks its source stale in `data/status.json` (tested in `tests/test_refresh.py`), but no check runs on the values themselves |
+| 3 | Training and serving are not skewed | none | `forecast.py` builds its inputs with the same `features.py` code as the backtest, but no test compares the two |
+| 4 | Models are not too stale | none | `data/status.json` flags old data, and the weekly workflow now reruns `site_data.py` so the page's copy stays current and commits on an ok/stale flip (`.github/workflows/refresh.yml`, `tests/test_refresh_commit.py`), but the refresh has never run on a schedule, since the repo has no GitHub remote yet |
 | 5 | Models are numerically stable | none | Nothing checks for missing or infinite values in predictions |
 | 6 | Computing performance has not regressed | none | Speed and memory use are not measured |
-| 7 | Prediction quality has not regressed | none | There is no served data. The test that compares a fresh run with `reports/metrics.json` catches offline changes only |
+| 7 | Prediction quality has not regressed | none | `forecast.py` grades ledger rows once the CBA publishes them, but none is graded yet and nothing raises an alert |
+
+## What would raise the score
+
+- Push the repo and let CI pass, which moves most half points to one point.
+- Let the weekly refresh run, so the ledger grades forecasts and the monitoring tests
+  have something to watch.
 
 [breck]: https://research.google/pubs/the-ml-test-score-a-rubric-for-ml-production-readiness-and-technical-debt-reduction/

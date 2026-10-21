@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Household credit stress</title>
+<meta
+  name="description"
+  content="A Canadian mortgage-arrears stress tester. Set paths for unemployment and the mortgage rate and see arrears respond, region by region."
+/>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="page-header">
+  <h1>Household credit stress</h1>
+  <p class="subtitle">
+    Set a path for unemployment and the posted 5-year mortgage rate over the next two
+    years and see how mortgage arrears respond, region by region. Built on public Bank
+    of Canada, Statistics Canada and Canadian Bankers Association data.
+  </p>
+  <p id="stale-badge" class="badge" hidden></p>
+</header>
+
+<main>
+  <section id="label-banner" class="banner" aria-live="polite"></section>
+
+  <section id="controls" aria-labelledby="controls-heading">
+    <h2 id="controls-heading">Set the scenario</h2>
+
+    <div class="driver-grid">
+      <fieldset class="driver-group" data-driver="unemployment_rate">
+        <legend>Unemployment rate</legend>
+        <p class="driver-last">Last known value: <span class="last-value">&ndash;</span> points</p>
+        <label class="slider-row">
+          <span>Change by 12 months</span>
+          <input type="range" class="slider" data-driver="unemployment_rate" data-reach="12" step="0.1" value="0" />
+          <output class="slider-output"></output>
+        </label>
+        <label class="slider-row">
+          <span>Change by 24 months</span>
+          <input type="range" class="slider" data-driver="unemployment_rate" data-reach="24" step="0.1" value="0" />
+          <output class="slider-output"></output>
+        </label>
+        <p class="driver-note" hidden></p>
+      </fieldset>
+
+      <fieldset class="driver-group" data-driver="mortgage_rate_5y">
+        <legend>Posted 5-year mortgage rate</legend>
+        <p class="driver-last">Last known value: <span class="last-value">&ndash;</span> %</p>
+        <label class="slider-row">
+          <span>Change by 12 months</span>
+          <input type="range" class="slider" data-driver="mortgage_rate_5y" data-reach="12" step="0.05" value="0" />
+          <output class="slider-output"></output>
+        </label>
+        <label class="slider-row">
+          <span>Change by 24 months</span>
+          <input type="range" class="slider" data-driver="mortgage_rate_5y" data-reach="24" step="0.05" value="0" />
+          <output class="slider-output"></output>
+        </label>
+        <p class="driver-note" hidden></p>
+      </fieldset>
+    </div>
+
+    <div class="presets" role="group" aria-label="Presets from history">
+      <span class="presets-label">Presets from history:</span>
+      <button type="button" class="preset-button" data-preset="0">Early 1990s recession</button>
+      <button type="button" class="preset-button" data-preset="1">2008&ndash;09 recession</button>
+      <button type="button" class="preset-button" data-preset="2">Rate rises of 2022&ndash;23</button>
+      <button type="button" class="preset-button preset-reset" data-preset="reset">Reset to flat</button>
+    </div>
+    <p id="scenario-status" class="section-caption"></p>
+
+    <label class="slider-row horizon-row">
+      <span>Show arrears this many months ahead</span>
+      <input type="range" id="horizon-slider" min="1" max="24" step="1" value="12" />
+      <output id="horizon-output" class="slider-output"></output>
+    </label>
+  </section>
+
+  <section id="map" aria-labelledby="map-heading">
+    <h2 id="map-heading">Arrears rate by region</h2>
+    <p id="map-caption" class="section-caption"></p>
+    <div id="tile-grid" class="tile-grid"></div>
+    <p id="tile-legend" class="legend-note"></p>
+  </section>
+
+  <section id="ledger" aria-labelledby="ledger-heading">
+    <h2 id="ledger-heading">Forecast record</h2>
+    <p class="section-caption">
+      Every forecast this app has made for 1 and 3 months ahead, graded in the open once
+      the CBA publishes the actual rate. A row is never changed after it is written.
+    </p>
+    <label class="region-select-row">
+      <span>Region</span>
+      <select id="ledger-region"></select>
+    </label>
+    <svg
+      id="ledger-chart"
+      viewBox="0 0 640 300"
+      role="img"
+      aria-label="Forecast and actual arrears rate over time, with the 80 percent interval"
+    ></svg>
+    <p id="ledger-empty" class="section-caption" hidden>
+      No forecasts are graded yet. The chart fills in as the CBA publishes each target
+      month's actual rate.
+    </p>
+    <table id="ledger-table" class="data-table">
+      <caption class="sr-only">Forecast record, as plain numbers</caption>
+      <thead>
+        <tr>
+          <th scope="col">Target month</th>
+          <th scope="col">Horizon</th>
+          <th scope="col">Forecast (bp)</th>
+          <th scope="col">80% interval</th>
+          <th scope="col">Actual (bp)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <footer class="page-footer">
+    <p>
+      Illustrative only, not financial, credit or policy advice. Arrears means mortgage
+      accounts three or more months overdue. See docs/decisions/0004-scenarios.md and
+      docs/whats_weak.md in the repo for how this model is built and what it gets wrong.
+    </p>
+  </footer>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
