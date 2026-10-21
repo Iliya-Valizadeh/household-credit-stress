@@ -1,6 +1,6 @@
 # 0005: The weekly refresh never fails the run and never commits CBA files
 
-Date: 2026-10-20. Status: accepted.
+Date: 2026-10-20. Status: accepted. The CBA part of the decision is partly replaced by [ADR 0006](0006-cba-numbers-only.md): only the numbers from each CBA file are kept, and they are committed.
 
 ## Context
 
