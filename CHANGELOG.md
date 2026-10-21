@@ -6,6 +6,8 @@ git tag.
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-20
+
 ### Added
 
 - Project skeleton generated from `ds-project-standard`.
