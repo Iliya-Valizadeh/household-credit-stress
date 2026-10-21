@@ -62,3 +62,27 @@ Keep only the numbers. Iliya chose this option on 2026-10-20.
   them now cite the new hashes, and the full old-to-new map is committed.
 - If the CBA changes its layout, the parser fails and the source is marked stale, as
   before (ADR 0001). The CSV format does not depend on the layout.
+
+## The history rewrite (2026-10-20)
+
+The rewrite was done once, on this computer, before the repo was ever pushed. It used
+`git filter-repo` to drop every `data/raw/cba/*.xlsx` file from every commit and to add
+`data/raw/cba/2026-07.csv` to the commit that first added the spreadsheet.
+
+- What changed: the hash of every commit from the first data pull on. The commit that
+  added the spreadsheet was `6a2c65c` and is now `4b34816`. The evaluation plan commit
+  was `bc8acfd` and is now `4c4e1c7`. The full map, as written by `git filter-repo`, is
+  in [docs/history_rewrite_map.txt](../history_rewrite_map.txt).
+- What did not change: any other file in any commit, and the message, author, author
+  date, committer date and order of every commit. This was checked against a copy of
+  the old history. For each rewritten commit, `git diff` between the old and the new
+  commit lists only `data/raw/cba/2026-07.xlsx` and `data/raw/cba/2026-07.csv`. The
+  log of messages, authors and dates is the same, line for line.
+- The backup: a `git bundle` of the whole history before the rewrite, and the
+  spreadsheet itself, are kept in Iliya's private portfolio folder, outside the repo.
+  The bundle was made just before the two commits that start this change, so it does
+  not hold their old versions. Their files were the same before and after the rewrite,
+  because neither old version held a spreadsheet.
+- Hashes cited in the docs now point to the new commits. One old hash stays on
+  purpose: `reports/test_runs.csv` is append-only (docs/eval_plan.md), so its first
+  row keeps the hash it recorded, `75ea840`. The map gives the new hash, `a9a1a65`.
