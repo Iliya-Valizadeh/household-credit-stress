@@ -1,0 +1,176 @@
+{
+  "about": "Every forecast this app has written to ledger/forecasts.csv for 1 and 3 months ahead (docs/eval_plan.md, 'Live forecast ledger'), joined with the actual arrears rate once the CBA publishes it (ledger/outcomes.csv). A forecast row is never edited after it is written; a target with no actual yet carries actual_bp: null.",
+  "generated_by": "python -m household_credit_stress.site_data",
+  "regions": [
+    "AB",
+    "ATL",
+    "BC",
+    "CA",
+    "MB",
+    "ON",
+    "QC",
+    "SK"
+  ],
+  "rows": [
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "AB",
+      "forecast_bp": 27.73,
+      "lo80_bp": 26.28,
+      "hi80_bp": 29.26,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "AB",
+      "forecast_bp": 27.57,
+      "lo80_bp": 23.94,
+      "hi80_bp": 31.16,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "ATL",
+      "forecast_bp": 29.98,
+      "lo80_bp": 28.41,
+      "hi80_bp": 31.59,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "ATL",
+      "forecast_bp": 29.93,
+      "lo80_bp": 26.09,
+      "hi80_bp": 33.34,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "BC",
+      "forecast_bp": 25.66,
+      "lo80_bp": 24.29,
+      "hi80_bp": 26.75,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "BC",
+      "forecast_bp": 25.69,
+      "lo80_bp": 22.54,
+      "hi80_bp": 28.06,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "CA",
+      "forecast_bp": 29.24,
+      "lo80_bp": 28.35,
+      "hi80_bp": 30.1,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "CA",
+      "forecast_bp": 29.26,
+      "lo80_bp": 27.24,
+      "hi80_bp": 31.47,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "MB",
+      "forecast_bp": 34.42,
+      "lo80_bp": 32.44,
+      "hi80_bp": 36.11,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "MB",
+      "forecast_bp": 34.4,
+      "lo80_bp": 30.54,
+      "hi80_bp": 37.41,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "ON",
+      "forecast_bp": 34.22,
+      "lo80_bp": 33.3,
+      "hi80_bp": 35.25,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "ON",
+      "forecast_bp": 34.22,
+      "lo80_bp": 31.5,
+      "hi80_bp": 36.6,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "QC",
+      "forecast_bp": 18.44,
+      "lo80_bp": 17.11,
+      "hi80_bp": 19.75,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "QC",
+      "forecast_bp": 18.4,
+      "lo80_bp": 15.85,
+      "hi80_bp": 21.04,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-08",
+      "horizon": 1,
+      "region": "SK",
+      "forecast_bp": 45.92,
+      "lo80_bp": 43.63,
+      "hi80_bp": 48.06,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-07",
+      "target_month": "2026-10",
+      "horizon": 3,
+      "region": "SK",
+      "forecast_bp": 46.05,
+      "lo80_bp": 41.51,
+      "hi80_bp": 49.98,
+      "actual_bp": null
+    }
+  ]
+}

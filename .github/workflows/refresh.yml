@@ -1,0 +1,108 @@
+name: Refresh data
+
+# Pulls the latest public data every Monday, rebuilds the live forecast ledger and the
+# page's copy in site/data/, and commits when a data file, a ledger row, or an ok/stale
+# field in data/status.json changed. A source that fails is marked stale and shows a
+# warning on the run; the pull, forecast and export steps are allowed to fail on their
+# own without failing the run, and a rejected push is a warning too (ADR 0005). Either
+# way the run itself passes, so a publisher's site change or a bug in one step does not
+# send a failure email every week (see docs/decisions/0001-refresh-and-stale-data.md).
+
+on:
+  schedule:
+    - cron: "23 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+          enable-cache: true
+
+      - name: Install pinned packages
+        run: uv sync --locked
+
+      - name: Pull the latest data
+        id: pull
+        continue-on-error: true
+        run: uv run python -m household_credit_stress.refresh
+
+      - name: Warn if the data pull failed
+        if: steps.pull.outcome == 'failure'
+        run: echo "::warning title=Data pull failed::No new data this run; the files from the last good run stay and are labelled stale. See the job log."
+
+      - name: Save the pre-run status, to spot an ok/stale flip later
+        run: git show HEAD:data/status.json > /tmp/status-before.json || echo '{}' > /tmp/status-before.json
+
+      - name: Update the live forecast ledger
+        id: forecast
+        continue-on-error: true
+        run: uv run python -m household_credit_stress.forecast
+
+      - name: Warn if the forecast step failed
+        if: steps.forecast.outcome == 'failure'
+        run: echo "::warning title=Forecast step failed::The ledger was not updated this run. See the job log."
+
+      - name: Export data for the page
+        id: export
+        continue-on-error: true
+        run: uv run python -m household_credit_stress.site_data
+
+      - name: Warn if the export step failed
+        if: steps.export.outcome == 'failure'
+        run: echo "::warning title=Export step failed::site/data was not refreshed this run. See the job log."
+
+      - name: Decide whether to commit
+        id: decide
+        run: |
+          # The refresh saves only the numbers from a new CBA spreadsheet, as
+          # data/raw/cba/YYYY-MM.csv, and that CSV is committed. The spreadsheet is
+          # never written to disk; the .xlsx exclusion is a second guard (ADR 0006).
+          git add data/ ':!data/raw/cba/*.xlsx' ledger/ site/data/
+          # status.json's checked_at and error change on every run, so a plain git
+          # diff on it would commit every week for no reason a reader cares about.
+          # Exclude both copies from the file-change check and instead ask
+          # refresh_commit whether an ok/stale field actually flipped (ADR 0001).
+          CHANGED=no
+          if ! git diff --cached --quiet -- \
+              data/processed ledger \
+              site/data/scenario.json site/data/ledger.json \
+              site/data/scenario_metrics.json site/data/scenario_presets.json; then
+            CHANGED=yes
+          fi
+          if uv run python -m household_credit_stress.refresh_commit \
+              --before /tmp/status-before.json --after data/status.json; then
+            CHANGED=yes
+          fi
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+
+      - name: Commit new data, ledger rows, or stale-flag changes, if any
+        if: steps.decide.outputs.changed == 'yes'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git commit -m "Refresh data ($(date -u +%Y-%m-%d))"; then
+            echo "::warning title=Commit failed::Nothing was committed this run. See the job log."
+            exit 0
+          fi
+          # Never force-push. One pull --rebase and one retry, then give up quietly.
+          if ! git push; then
+            if git pull --rebase --autostash && git push; then
+              exit 0
+            fi
+            git rebase --abort 2>/dev/null || true
+            echo "::warning title=Push failed::The refresh commit was not pushed this run. The next run tries again."
+          fi
+          exit 0

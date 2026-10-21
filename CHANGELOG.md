@@ -9,3 +9,27 @@ git tag.
 ### Added
 
 - Project skeleton generated from `ds-project-standard`.
+- Fetchers for the Bank of Canada, Statistics Canada and CBA data, and a weekly refresh
+  in which a failed source is shown as stale (ADR 0001).
+- The pre-registered evaluation plan and forecast target (ADR 0002).
+- The monthly feature panel with point-in-time lags, the [backtest](docs/glossary.md#backtest) harness, and the
+  persistence and AR(1) baselines.
+- The `arx` model (ADR 0003) and its backtest result.
+- The append-only live forecast ledger, with its first forecasts.
+- The `pooled_arx` scenario engine (ADR 0004), its twelve- and twenty-four-month check,
+  and the history presets.
+- The static web page in `site/`.
+- Docs to the house standard, and an ML Test Score self-assessment of the real system.
+- The append-only test-run log in `reports/test_runs.csv`, written by `evaluate.py` and
+  `evaluate_scenario.py` after every run.
+
+### Changed
+
+- The CBA archive keeps only the numbers from each monthly file, as a CSV that
+  credits the CBA, not the spreadsheet itself (ADR 0006).
+
+### Removed
+
+- The template's synthetic worked example.
+- The CBA spreadsheet `data/raw/cba/2026-07.xlsx`, from the repo and its history
+  (ADR 0006). Its numbers are in `data/raw/cba/2026-07.csv`.

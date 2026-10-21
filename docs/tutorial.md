@@ -6,6 +6,9 @@ the demo output. You need `uv`, `make`, and the Python version named in
 
 ## Step 1: get the code
 
+The repo is not on GitHub yet, so the address below does not work until it is. Until
+then, start from a local copy.
+
 ```bash
 git clone https://github.com/Iliya-Valizadeh/household-credit-stress.git
 cd household-credit-stress
@@ -23,9 +26,10 @@ make setup
 make demo
 ```
 
-TODO: say what the reader should see when the demo finishes.
-
-Until you replace the template example, the demo makes a small synthetic dataset. It
-fits a [baseline](glossary.md#baseline) and a linear model. Then it prints the
-[mean absolute error](glossary.md#mean-absolute-error) of each one on the test rows,
-with a [confidence interval](glossary.md#confidence-interval).
+This takes a few minutes. `make demo` runs the real [backtest](glossary.md#backtest) on the data already
+committed under `data/processed/`, with no downloads and no keys. It prints the ADR
+0003 `arx` model's gap against the AR(1) [baseline](glossary.md#baseline), in
+[basis points](glossary.md#basis-point), for one month ahead and three months ahead,
+each with a [confidence interval](glossary.md#confidence-interval) and a plain-word
+verdict such as "no clear difference". The numbers it prints match
+[CLAIMS.md](../CLAIMS.md).

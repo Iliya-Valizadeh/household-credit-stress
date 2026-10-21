@@ -1,0 +1,30 @@
+{
+  "mortgage_rate_5y": {
+    "ok": true,
+    "stale": false,
+    "latest_month": "2026-10",
+    "checked_at": "2026-10-08T19:18:52+00:00",
+    "error": null
+  },
+  "unemployment": {
+    "ok": true,
+    "stale": false,
+    "latest_month": "2026-08",
+    "checked_at": "2026-10-08T19:18:52+00:00",
+    "error": null
+  },
+  "arrears": {
+    "ok": true,
+    "stale": false,
+    "latest_month": "2026-07",
+    "checked_at": "2026-10-08T19:18:52+00:00",
+    "error": null
+  },
+  "labour_force": {
+    "ok": true,
+    "stale": false,
+    "latest_month": "2026-08",
+    "checked_at": "2026-10-08T19:18:52+00:00",
+    "error": null
+  }
+}
