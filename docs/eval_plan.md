@@ -321,3 +321,18 @@ Also reported, never used for the verdict:
 The test is run once per model version. Each run adds a row to the append-only test log
 in `reports/`, as for the main test. The single-vintage caveat applies, so every place
 that shows these numbers says "backtest on the latest vintage".
+
+### 2026-10-20: the commit hashes changed once
+
+On 2026-10-20 the repo's history was rewritten once, on this computer, before its
+first push. The only reason was to remove the CBA spreadsheet
+`data/raw/cba/2026-07.xlsx` from every commit
+([ADR 0006](decisions/0006-cba-numbers-only.md)). The commit that first added the
+spreadsheet now adds its numbers instead, as `data/raw/cba/2026-07.csv`. No other file
+in any commit changed. No commit's message, author, date or order changed. But every
+commit from the first data pull on has a new hash.
+
+This plan was first committed as `bc8acfd`. That commit is now `4c4e1c7`, and every
+file in it outside `data/raw/cba/` is the same as before. The full old-to-new map is in
+[history_rewrite_map.txt](history_rewrite_map.txt). A backup of the old history is
+kept outside the repo. Nothing in this plan changes.

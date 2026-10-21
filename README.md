@@ -107,6 +107,13 @@ This repo pulls from three public sources, each under its own terms.
   the CBA and gives the page address and download time. The spreadsheets are not in
   the repo or its history ([ADR 0006](docs/decisions/0006-cba-numbers-only.md)).
 
+History note: to take the spreadsheet out of every past commit, the repo's history was
+rewritten once, on 2026-10-20, on this computer, before the first push. No other file
+and no commit's message, date or order changed, but commit hashes from before that day
+are different now. The old-to-new map is in
+[docs/history_rewrite_map.txt](docs/history_rewrite_map.txt), and a backup of the old
+history is kept outside the repo.
+
 ## What's weak
 
 The two biggest weaknesses: `arx` does not beat AR(1) at one and three months (see
