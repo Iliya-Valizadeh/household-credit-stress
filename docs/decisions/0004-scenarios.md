@@ -145,7 +145,7 @@ month follows a stated rule, so it was not picked to make the result look a cert
 | Rate rises of 2022 and 2023 | Last month at the lowest posted 5-year rate in 2021 and 2022 | 2022-03 | The same three files, 2022-03 to 2024-02 |
 
 - The start months above come from applying each rule to the data files committed on
-  this branch by the first data pull (commit `6a2c65c`). T09 computes them again in code and fails if they
+  this branch by the first data pull (commit `4b34816`). T09 computes them again in code and fails if they
   differ.
 - T09 writes each preset's monthly changes to a generated file. Any change quoted in
   prose goes through `CLAIMS.md`.
