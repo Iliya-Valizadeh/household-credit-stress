@@ -5,7 +5,8 @@ Run with `python -m household_credit_stress.refresh`. It writes:
 - `data/processed/mortgage_rate_5y.csv`: monthly mean of the 5-year posted rate
 - `data/processed/unemployment.csv`: monthly unemployment rate by province
 - `data/processed/arrears.csv`: monthly mortgages and arrears by CBA region
-- `data/raw/cba/YYYY-MM.xlsx`: a copy of every CBA file, since the CBA removes old ones
+- `data/raw/cba/YYYY-MM.csv`: the numbers from every CBA file, since the CBA removes old
+  ones. The spreadsheet itself is not kept (ADR 0006)
 - `data/status.json`: for each source, whether the last pull worked and how old its
   newest month is
 
