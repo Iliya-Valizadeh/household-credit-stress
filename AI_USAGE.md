@@ -6,7 +6,8 @@ This page says which parts of the work were mine and which parts an AI coding as
 did. The owner of the repo edits it and removes the draft line above.
 
 The assistant drafted this page from the repo's own record: the commit history, the
-`Co-Authored-By` lines on each commit, and the task notes. It does not claim any
+`Co-Authored-By` lines that were on each commit (removed from the history on
+2026-10-21), and the task notes. It does not claim any
 decision for me that the record does not show. Iliya: add your own part below, in your
 own words, and delete this paragraph.
 

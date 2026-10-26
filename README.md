@@ -119,8 +119,8 @@ history is kept outside the repo.
 The two biggest weaknesses: `arx` does not beat AR(1) at one and three months (see
 "Result" above), and the scenario engine's own twelve- and twenty-four-month check
 against AR(1) also fails, so every scenario is shown as "Illustrative: not a forecast",
-never as a conditional forecast. There is also no live record yet: the repo is not
-on GitHub, so the weekly refresh has never run and no ledger forecast is graded. The
+never as a conditional forecast. There is also no live record yet: the repo has been
+on GitHub since 2026-10-20, but the weekly refresh has not run yet, so no ledger forecast is graded. The
 full ranked list, including why history before
 this repo's own archive is visible only as its latest revision, is in
 [docs/whats_weak.md](docs/whats_weak.md).
