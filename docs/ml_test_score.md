@@ -29,20 +29,21 @@ system.
 
 The scores below were set before the repo was on GitHub, so every test that `pytest`
 covers counts as done by hand. Since 2026-10-20, CI (continuous integration, the checks
-GitHub runs on every push) has run and passed on `main`. Rescoring the tests that CI
-runs, from half a point to one point, has not been done yet.
+GitHub runs on every push) has run and passed on `main`. On 2026-10-26 the tests that
+`make test` runs in CI were rescored from half a point to one point, checked against CI
+run 40350167413. <!-- not-a-claim -->
 
 ## Summary
 
 | Section | Score out of 7 |
 |---|---|
-| Features and data | one point |
+| Features and data | one and a half points |
 | Model development | one point |
-| Infrastructure | two points |
+| Infrastructure | four points |
 | Monitoring | none |
 | Overall (the lowest section) | 0 |
 
-In total, eight tests earn half a point each. The other tests earn nothing.
+In total, four tests earn one point each and four earn half a point. The other tests earn nothing.
 
 ## Tests for features and data
 
@@ -54,7 +55,7 @@ In total, eight tests earn half a point each. The other tests earn nothing.
 | 4 | Features adhere to meta-level requirements | half | The point-in-time rule in [the evaluation plan](eval_plan.md) is tested: a feature from after the cutoff raises (`tests/test_backtest.py`). The three data sources' terms of use are recorded in the README's [Data notes](../README.md#data-notes): the Bank of Canada and Statistics Canada licences allow redistribution with attribution. The CBA's terms allow accurate, credited copying of its information but do not say whether its spreadsheet may be shared, so the repo keeps only the CBA's numbers, with a credit header, and no spreadsheet ([ADR 0006](decisions/0006-cba-numbers-only.md)). `tests/test_sources.py` checks that each archived CBA file is numbers only and credits the CBA. No test checks the other terms |
 | 5 | The data pipeline has appropriate privacy controls | none | The data are public regional totals with no personal data, and there is no privacy control |
 | 6 | New features can be added quickly | none | Not measured |
-| 7 | All input feature code is tested | half | `tests/test_features.py` covers the lag rules and the Atlantic aggregation, and `tests/test_sources.py` covers each parser on saved replies |
+| 7 | All input feature code is tested | one point | `tests/test_features.py` covers the lag rules and the Atlantic aggregation, and `tests/test_sources.py` covers each parser on saved replies |
 
 ## Tests for model development
 
@@ -72,9 +73,9 @@ In total, eight tests earn half a point each. The other tests earn nothing.
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Training is reproducible | half | The bootstrap uses a fixed seed and packages come from the lockfile. Two tests rerun the backtest and the scenario check and compare them with the committed reports (`tests/test_backtest.py`, `tests/test_scenario.py`) |
-| 2 | Model specs are unit tested | half | `tests/test_arrears_model.py` and `tests/test_scenario.py` check that each fit recovers known slopes from exact data, a forward run worked out by hand, the sign rule and the deferral-month drop |
-| 3 | The ML pipeline is integration tested | half | The same two reproduction tests run the whole evaluation from `data/processed/` to the reports. The fetch step is tested only with saved replies |
+| 1 | Training is reproducible | one point | The bootstrap uses a fixed seed and packages come from the lockfile. Two tests rerun the backtest and the scenario check and compare them with the committed reports (`tests/test_backtest.py`, `tests/test_scenario.py`) |
+| 2 | Model specs are unit tested | one point | `tests/test_arrears_model.py` and `tests/test_scenario.py` check that each fit recovers known slopes from exact data, a forward run worked out by hand, the sign rule and the deferral-month drop |
+| 3 | The ML pipeline is integration tested | one point | The same two reproduction tests run the whole evaluation from `data/processed/` to the reports. The fetch step is tested only with saved replies |
 | 4 | Model quality is validated before serving | half | The scenario label on the page comes from the pre-registered check in `reports/scenario_metrics.json`, so a failed check shows "Illustrative: not a forecast". The ledger forecasts are written with no quality gate |
 | 5 | The model is debuggable | none | There is no tool to follow one forecast through the model step by step |
 | 6 | Models are canaried before serving | none | There is no staged release |
@@ -94,7 +95,7 @@ In total, eight tests earn half a point each. The other tests earn nothing.
 
 ## What would raise the score
 
-- Push the repo and let CI pass, which moves most half points to one point.
+- Add CI-run tests for the four tests still done by hand.
 - Let the weekly refresh run, so the ledger grades forecasts and the monitoring tests
   have something to watch.
 
