@@ -27,10 +27,10 @@ the four section scores, so one weak section pulls the whole system down. The pa
 reads an overall score of zero as closer to a research project than a production
 system.
 
-The repo has no GitHub remote yet, so CI (continuous integration, the checks GitHub
-runs on every push) has never run. Every test below that `pytest` covers therefore
-counts as done by hand. Once CI passes on GitHub, the tests that CI runs can move from
-half a point to one point.
+The scores below were set before the repo was on GitHub, so every test that `pytest`
+covers counts as done by hand. Since 2026-10-20, CI (continuous integration, the checks
+GitHub runs on every push) has run and passed on `main`. Rescoring the tests that CI
+runs, from half a point to one point, has not been done yet.
 
 ## Summary
 

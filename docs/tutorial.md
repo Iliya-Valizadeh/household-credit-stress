@@ -6,9 +6,6 @@ the demo output. You need `uv`, `make`, and the Python version named in
 
 ## Step 1: get the code
 
-The repo is not on GitHub yet, so the address below does not work until it is. Until
-then, start from a local copy.
-
 ```bash
 git clone https://github.com/Iliya-Valizadeh/household-credit-stress.git
 cd household-credit-stress
