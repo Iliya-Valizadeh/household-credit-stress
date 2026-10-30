@@ -61,7 +61,7 @@ In total, four tests earn one point each and four earn half a point. The other t
 
 | # | Test | Score | Evidence or gap |
 |---|---|---|---|
-| 1 | Model specs (the code that defines a model) are reviewed and checked in | none | Each model has an ADR committed before its code, and an AI review session checked them. No second person has reviewed them |
+| 1 | Model specs (the code that defines a model) are reviewed and checked in | none | Each model has an ADR committed before its code. No second person has reviewed them |
 | 2 | Offline and online metrics correlate | none | The live ledger holds one set of forecasts and none is graded yet, so there is nothing to compare with the [backtest](glossary.md#backtest) |
 | 3 | All hyperparameters have been tuned | none | Nothing is tuned, on purpose (ADR 0003). There is no tuning code |
 | 4 | The impact of model staleness is known | none | Both models are refit at every origin, and the effect of using an older fit was not studied |

@@ -58,7 +58,6 @@ ahead there, while the two models are close to even in the periods before and af
   [docs/whats_weak.md](docs/whats_weak.md).
 - How ready it is for production, scored against Breck et al.'s checklist:
   [docs/ml_test_score.md](docs/ml_test_score.md).
-- How the AI assistant was used: [AI_USAGE.md](AI_USAGE.md).
 
 ## How it works
 
