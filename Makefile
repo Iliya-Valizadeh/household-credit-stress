@@ -25,7 +25,7 @@ demo:
 	$(RUN) python -m $(PKG).demo
 
 check-docs:
-	$(RUN) python tools/ai_signs_check.py $(DOCS)
+	$(RUN) python tools/writing_style_check.py $(DOCS)
 	$(RUN) python tools/claims_check.py $(DOCS)
 	$(RUN) python tools/readability_check.py --glossary docs/glossary.md $(DOCS)
 	$(RUN) python tools/links_check.py $(DOCS)
