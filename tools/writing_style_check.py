@@ -6,11 +6,11 @@ PATH can be a file or a folder (folders are searched for Markdown files).
 Exit code 0 means zero flags. Exit code 1 means at least one flag.
 
 Code blocks, inline code, front matter, HTML comments and link targets are skipped,
-because they are not prose. Only the mechanical signs can be caught this way.
+because they are not prose. Only the mechanical patterns can be caught this way.
 Rule-of-three lists, shallow analysis and puffery in new words still need a human read.
 
-Adapted from the earlier `_portfolio_upgrade/writing_style_check.py`. The word list and
-patterns are the same; this version also skips code and URLs and accepts folders.
+Adapted from an earlier version of this check. The word list and patterns are the
+same; this version also skips code and URLs and accepts folders.
 It also fixes two patterns ("overall," and "certainly!") that could never match before,
 because a word boundary was required right after the punctuation.
 """
@@ -29,7 +29,7 @@ from _markdown import (
     strip_link_targets,
 )
 
-# Puffery words, plus copula dodges and others.
+# Puffery and filler words, plus copula dodges and others.
 VOCAB = r"""additionally|align(?:s|ed)? with|boasts?|bolstered|crucial|deep dive|delve[sd]?|
 emphasi[sz]ing|enduring|enhanc(?:e|es|ed|ing)|foster(?:s|ed|ing)?|garner(?:s|ed)?|
 highlight(?:s|ed|ing)?|interplay|intricate|intricacies|landscape|meticulous(?:ly)?|pivotal|
@@ -62,7 +62,7 @@ PATTERNS: dict[str, str] = {
     "challenges formula": (
         r"\b(?:despite (?:its|these) (?:challenges|limitations)|future (?:outlook|prospects))\b"
     ),
-    "chatbot address": r"\b(?:i hope this helps|let me know|certainly!|here is a|would you like)",
+    "chatty address": r"\b(?:i hope this helps|let me know|certainly!|here is a|would you like)",
     "vague association": r"\b(?:in connection with|associated with|connected to)\b",
     "em dash": "—",
     "curly quote": "[“”‘’]",
