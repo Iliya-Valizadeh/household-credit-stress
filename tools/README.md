@@ -8,7 +8,7 @@ Change them in the template, then run `copier update` in this repo.
 
 | Tool | What it checks |
 |---|---|
-| `ai_signs_check.py` | Common signs of AI writing: puffery words, em dashes, bold lead-ins, title-case headings |
+| `ai_signs_check.py` | Writing style: puffery words, em dashes, bold lead-ins, title-case headings |
 | `claims_check.py` | Every number in `CLAIMS.md` matches its source file, and every number in the docs is listed in `CLAIMS.md` |
 | `readability_check.py` | Reading grade of the "In plain words" section and notes, reading grade of the rest, and glossary links on first use |
 | `links_check.py` | Links between local files and to sections inside them, with no network access |

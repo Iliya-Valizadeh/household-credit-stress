@@ -11,7 +11,7 @@ Facts to look up: commands, files and settings.
 | `make test` | Runs pytest with a coverage report for `src/` |
 | `make eval` | Runs the evaluation and writes `reports/metrics.json` |
 | `make demo` | Reruns the [backtest](glossary.md#backtest) on the committed data and prints the headline result, with no downloads or keys |
-| `make check-docs` | Runs the claims, readability, AI-writing signs, link and README checks |
+| `make check-docs` | Runs the claims, readability, writing-style, link and README checks |
 | `make all` | Runs every step above in order |
 
 ## Output files
