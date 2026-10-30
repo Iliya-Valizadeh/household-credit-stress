@@ -30,7 +30,7 @@ has never been pushed, so no copy of it has left this computer.
 
 ## Decision
 
-Keep only the numbers. Iliya chose this option on 2026-10-20.
+Keep only the numbers. I chose this option on 2026-10-20.
 
 - `sources/cba.py` reads a downloaded spreadsheet in memory and writes
   `data/raw/cba/YYYY-MM.csv`. The spreadsheet is never written to disk. An existing CSV
@@ -43,11 +43,11 @@ Keep only the numbers. Iliya chose this option on 2026-10-20.
   exists. This is the same rule as before, with a new file type.
 - `.gitignore` excludes `data/raw/cba/*.xlsx`, and the refresh workflow still leaves
   that pattern out of `git add`, as a second guard.
-- The old spreadsheet is moved out of the repo, to Iliya's private portfolio folder.
+- The old spreadsheet is moved out of the repo, to my private portfolio folder.
   Nothing is deleted.
 - Because the repo has never been pushed, its local history is rewritten once, before
   the first push, so that no commit holds the spreadsheet. The commit that first added
-  the spreadsheet now adds the CSV instead. Iliya approved this one rewrite on
+  the spreadsheet now adds the CSV instead. I approved this one rewrite on
   2026-10-20.
 
 ## Consequences
@@ -79,7 +79,7 @@ The rewrite was done once, on this computer, before the repo was ever pushed. It
   commit lists only `data/raw/cba/2026-07.xlsx` and `data/raw/cba/2026-07.csv`. The
   log of messages, authors and dates is the same, line for line.
 - The backup: a `git bundle` of the whole history before the rewrite, and the
-  spreadsheet itself, are kept in Iliya's private portfolio folder, outside the repo.
+  spreadsheet itself, are kept in my private portfolio folder, outside the repo.
   The bundle was made just before the two commits that start this change, so it does
   not hold their old versions. Their files were the same before and after the rewrite,
   because neither old version held a spreadsheet.
