@@ -2,3 +2,4 @@
 *.png binary
 *.jpg binary
 *.parquet binary
+Makefile linguist-detectable=false
