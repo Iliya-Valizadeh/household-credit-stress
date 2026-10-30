@@ -6,7 +6,7 @@ Short form of the model card from Mitchell et al., "Model Cards for Model Report
 
 ## Model details
 
-Two linear models, both fitted by ordinary least squares, built by Iliya Valizadeh.
+Two linear models, both fitted by ordinary least squares. I (Iliya Valizadeh) built them.
 
 - `arx` ([ADR 0003](docs/decisions/0003-arrears-model.md)): an AR(1) term on the
   monthly change in the arrears rate, plus two lagged driver terms, fitted by region.

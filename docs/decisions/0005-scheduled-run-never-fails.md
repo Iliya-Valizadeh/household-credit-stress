@@ -4,7 +4,7 @@ Date: 2026-10-20. Status: accepted. The CBA part of the decision is partly repla
 
 ## Context
 
-`refresh.yml` is the only scheduled workflow. A failed run emails the owner, so a bug or a site change must not fail it week after week. Separately, whether the repo may archive the CBA spreadsheets is still an open question (see "Needs Iliya" in the portfolio status file).
+`refresh.yml` is the only scheduled workflow. A failed run emails me, so a bug or a site change must not fail it week after week. Separately, whether the repo may archive the CBA spreadsheets is still an open question that I have not settled.
 
 ## Decision
 
