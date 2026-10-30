@@ -52,7 +52,7 @@ KNOWN = {
     "src/": "The package code",
     "template/": "The Copier template files",
     "tests/": "Unit and data tests",
-    "tools/": "Checks for claims, readability, AI-writing signs and links",
+    "tools/": "Checks for claims, readability, writing style and links",
     "CLAIMS.md": "Every number in the docs, with its source file and command",
     "Makefile": "One command for each step: setup, lint, test, eval, demo",
 }

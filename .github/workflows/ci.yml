@@ -27,7 +27,7 @@ jobs:
       - name: Tests (pytest, coverage of src)
         run: make test
 
-      - name: Docs checks (claims, readability, AI-writing signs, local links, README)
+      - name: Docs checks (claims, readability, writing style, local links, README)
         run: make check-docs
 
       - name: Demo runs with no downloads or keys

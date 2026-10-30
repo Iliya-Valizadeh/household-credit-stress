@@ -58,7 +58,6 @@ ahead there, while the two models are close to even in the periods before and af
   [docs/whats_weak.md](docs/whats_weak.md).
 - How ready it is for production, scored against Breck et al.'s checklist:
   [docs/ml_test_score.md](docs/ml_test_score.md).
-- How the AI assistant was used: [AI_USAGE.md](AI_USAGE.md).
 
 ## How it works
 
@@ -150,7 +149,7 @@ this repo's own archive is visible only as its latest revision, is in
 | `site/` | The static page for GitHub Pages and the JSON files `site_data.py` exports for it |
 | `src/` | The package code |
 | `tests/` | Unit and data tests |
-| `tools/` | Checks for claims, readability, AI-writing signs and links |
+| `tools/` | Checks for claims, readability, writing style and links |
 <!-- repo-map:end -->
 
 ## License
