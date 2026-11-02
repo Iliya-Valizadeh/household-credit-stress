@@ -20,6 +20,16 @@
       "forecast_bp": 27.73,
       "lo80_bp": 26.28,
       "hi80_bp": 29.26,
+      "actual_bp": 28.11
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "AB",
+      "forecast_bp": 28.27,
+      "lo80_bp": 26.82,
+      "hi80_bp": 29.79,
       "actual_bp": null
     },
     {
@@ -33,6 +43,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "AB",
+      "forecast_bp": 28.06,
+      "lo80_bp": 24.44,
+      "hi80_bp": 31.65,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -40,6 +60,16 @@
       "forecast_bp": 29.98,
       "lo80_bp": 28.41,
       "hi80_bp": 31.59,
+      "actual_bp": 31.01
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "ATL",
+      "forecast_bp": 31.27,
+      "lo80_bp": 29.69,
+      "hi80_bp": 32.88,
       "actual_bp": null
     },
     {
@@ -53,6 +83,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "ATL",
+      "forecast_bp": 31.34,
+      "lo80_bp": 27.5,
+      "hi80_bp": 34.75,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -60,6 +100,16 @@
       "forecast_bp": 25.66,
       "lo80_bp": 24.29,
       "hi80_bp": 26.75,
+      "actual_bp": 26.54
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "BC",
+      "forecast_bp": 26.76,
+      "lo80_bp": 25.38,
+      "hi80_bp": 27.85,
       "actual_bp": null
     },
     {
@@ -73,6 +123,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "BC",
+      "forecast_bp": 26.84,
+      "lo80_bp": 23.69,
+      "hi80_bp": 29.2,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -80,6 +140,16 @@
       "forecast_bp": 29.24,
       "lo80_bp": 28.35,
       "hi80_bp": 30.1,
+      "actual_bp": 29.83
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "CA",
+      "forecast_bp": 30.08,
+      "lo80_bp": 29.19,
+      "hi80_bp": 30.94,
       "actual_bp": null
     },
     {
@@ -93,6 +163,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "CA",
+      "forecast_bp": 30.12,
+      "lo80_bp": 28.11,
+      "hi80_bp": 32.33,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -100,6 +180,16 @@
       "forecast_bp": 34.42,
       "lo80_bp": 32.44,
       "hi80_bp": 36.11,
+      "actual_bp": 34.65
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "MB",
+      "forecast_bp": 34.66,
+      "lo80_bp": 32.69,
+      "hi80_bp": 36.36,
       "actual_bp": null
     },
     {
@@ -113,6 +203,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "MB",
+      "forecast_bp": 34.64,
+      "lo80_bp": 30.78,
+      "hi80_bp": 37.64,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -120,6 +220,16 @@
       "forecast_bp": 34.22,
       "lo80_bp": 33.3,
       "hi80_bp": 35.25,
+      "actual_bp": 35.06
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "ON",
+      "forecast_bp": 35.37,
+      "lo80_bp": 34.46,
+      "hi80_bp": 36.41,
       "actual_bp": null
     },
     {
@@ -133,6 +243,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "ON",
+      "forecast_bp": 35.38,
+      "lo80_bp": 32.66,
+      "hi80_bp": 37.78,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -140,6 +260,16 @@
       "forecast_bp": 18.44,
       "lo80_bp": 17.11,
       "hi80_bp": 19.75,
+      "actual_bp": 18.71
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "QC",
+      "forecast_bp": 18.75,
+      "lo80_bp": 17.43,
+      "hi80_bp": 20.06,
       "actual_bp": null
     },
     {
@@ -153,6 +283,16 @@
       "actual_bp": null
     },
     {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "QC",
+      "forecast_bp": 18.76,
+      "lo80_bp": 16.22,
+      "hi80_bp": 21.39,
+      "actual_bp": null
+    },
+    {
       "origin_month": "2026-07",
       "target_month": "2026-08",
       "horizon": 1,
@@ -160,6 +300,16 @@
       "forecast_bp": 45.92,
       "lo80_bp": 43.63,
       "hi80_bp": 48.06,
+      "actual_bp": 44.51
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-09",
+      "horizon": 1,
+      "region": "SK",
+      "forecast_bp": 44.47,
+      "lo80_bp": 42.18,
+      "hi80_bp": 46.61,
       "actual_bp": null
     },
     {
@@ -170,6 +320,16 @@
       "forecast_bp": 46.05,
       "lo80_bp": 41.51,
       "hi80_bp": 49.98,
+      "actual_bp": null
+    },
+    {
+      "origin_month": "2026-08",
+      "target_month": "2026-11",
+      "horizon": 3,
+      "region": "SK",
+      "forecast_bp": 44.5,
+      "lo80_bp": 39.96,
+      "hi80_bp": 48.42,
       "actual_bp": null
     }
   ]
