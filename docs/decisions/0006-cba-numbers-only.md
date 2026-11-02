@@ -70,8 +70,8 @@ The rewrite was done once, on this computer, before the repo was ever pushed. It
 `data/raw/cba/2026-07.csv` to the commit that first added the spreadsheet.
 
 - What changed: the hash of every commit from the first data pull on. The commit that
-  added the spreadsheet was `6a2c65c` and is now `4b34816`. The evaluation plan commit
-  was `bc8acfd` and is now `4c4e1c7`. The full map, as written by `git filter-repo`, is
+  added the spreadsheet was `6a2c65c` and is now `5a68bc1`. The evaluation plan commit
+  was `bc8acfd` and is now `188faf0`. The full map, as written by `git filter-repo`, is
   in [docs/history_rewrite_map.txt](../history_rewrite_map.txt).
 - What did not change: any other file in any commit, and the message, author, author
   date, committer date and order of every commit. This was checked against a copy of
@@ -85,4 +85,4 @@ The rewrite was done once, on this computer, before the repo was ever pushed. It
   because neither old version held a spreadsheet.
 - Hashes cited in the docs now point to the new commits. One old hash stays on
   purpose: `reports/test_runs.csv` is append-only (docs/eval_plan.md), so its first
-  row keeps the hash it recorded, `75ea840`. The map gives the new hash, `a9a1a65`.
+  row keeps the hash it recorded, `75ea840`. The map gives the new hash, `4660907`.
