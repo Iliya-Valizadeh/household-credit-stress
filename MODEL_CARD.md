@@ -78,8 +78,8 @@ clear difference from AR(1) (`CLAIMS.md`).
 
 `pooled_arx` against AR(1), given the true future rate and unemployment path (a
 conditional backtest, not a point-in-time forecast): the test MAE gap is 1.25 bp at
-twelve months (interval -0.08 to 3.79 bp) and 1.64 bp at twenty-four months (interval
--0.17 to 5.67 bp), both at the 95% level. Both intervals include zero, so `pooled_arx` <!-- not-a-claim -->
+twelve months (interval -0.10 to 3.71 bp) and 1.62 bp at twenty-four months (interval
+-0.20 to 5.60 bp), both at the 95% level. Both intervals include zero, so `pooled_arx` <!-- not-a-claim -->
 fails its own pre-registered check and every scenario is labelled "Illustrative: not a
 forecast" (`CLAIMS.md`, `reports/scenario_metrics.json`).
 

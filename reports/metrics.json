@@ -16,7 +16,7 @@
   },
   "test_period": {
     "start": "2017-01",
-    "end": "2026-06"
+    "end": "2026-07"
   },
   "prediction_interval_level": 0.8,
   "interval": {
@@ -45,7 +45,7 @@
             "ci_low": 0.62,
             "ci_high": 0.85
           },
-          "n_origins": 114,
+          "n_origins": 115,
           "interval_coverage_80": 0.858,
           "interval_width_bp": 2.86
         },
@@ -56,7 +56,7 @@
           "MB": 0.81,
           "SK": 1.25,
           "AB": 0.73,
-          "BC": 0.38,
+          "BC": 0.39,
           "CA": 0.42
         }
       },
@@ -74,21 +74,21 @@
         "test": {
           "mae_bp": {
             "value": 1.53,
-            "ci_low": 1.22,
-            "ci_high": 1.89
+            "ci_low": 1.23,
+            "ci_high": 1.88
           },
-          "n_origins": 112,
+          "n_origins": 113,
           "interval_coverage_80": 0.856,
           "interval_width_bp": 6.21
         },
         "by_region_test_mae_bp": {
-          "ATL": 1.8,
-          "QC": 1.22,
-          "ON": 1.1,
-          "MB": 1.44,
-          "SK": 2.59,
+          "ATL": 1.79,
+          "QC": 1.21,
+          "ON": 1.12,
+          "MB": 1.43,
+          "SK": 2.6,
           "AB": 1.62,
-          "BC": 0.94,
+          "BC": 0.93,
           "CA": 1.04
         }
       }
@@ -111,7 +111,7 @@
             "ci_low": 0.6,
             "ci_high": 0.82
           },
-          "n_origins": 114,
+          "n_origins": 115,
           "interval_coverage_80": 0.861,
           "interval_width_bp": 2.65
         },
@@ -122,8 +122,8 @@
           "MB": 0.82,
           "SK": 1.25,
           "AB": 0.7,
-          "BC": 0.34,
-          "CA": 0.34
+          "BC": 0.35,
+          "CA": 0.35
         }
       },
       "h3": {
@@ -141,20 +141,20 @@
           "mae_bp": {
             "value": 1.49,
             "ci_low": 1.19,
-            "ci_high": 1.85
+            "ci_high": 1.84
           },
-          "n_origins": 112,
+          "n_origins": 113,
           "interval_coverage_80": 0.861,
           "interval_width_bp": 5.91
         },
         "by_region_test_mae_bp": {
-          "ATL": 1.73,
-          "QC": 1.18,
-          "ON": 1.01,
-          "MB": 1.44,
+          "ATL": 1.72,
+          "QC": 1.17,
+          "ON": 1.03,
+          "MB": 1.42,
           "SK": 2.6,
-          "AB": 1.61,
-          "BC": 0.87,
+          "AB": 1.6,
+          "BC": 0.86,
           "CA": 0.97
         }
       }
@@ -175,19 +175,19 @@
           "mae_bp": {
             "value": 0.73,
             "ci_low": 0.6,
-            "ci_high": 0.93
+            "ci_high": 0.94
           },
-          "n_origins": 114,
-          "interval_coverage_80": 0.848,
+          "n_origins": 115,
+          "interval_coverage_80": 0.847,
           "interval_width_bp": 2.6
         },
         "by_region_test_mae_bp": {
           "ATL": 0.81,
           "QC": 0.64,
-          "ON": 0.38,
-          "MB": 0.84,
+          "ON": 0.39,
+          "MB": 0.83,
           "SK": 1.29,
-          "AB": 0.78,
+          "AB": 0.77,
           "BC": 0.38,
           "CA": 0.38
         }
@@ -206,21 +206,21 @@
         "test": {
           "mae_bp": {
             "value": 1.66,
-            "ci_low": 1.21,
-            "ci_high": 2.35
+            "ci_low": 1.22,
+            "ci_high": 2.34
           },
-          "n_origins": 112,
-          "interval_coverage_80": 0.844,
+          "n_origins": 113,
+          "interval_coverage_80": 0.845,
           "interval_width_bp": 5.8
         },
         "by_region_test_mae_bp": {
-          "ATL": 1.82,
-          "QC": 1.37,
-          "ON": 1.15,
-          "MB": 1.56,
+          "ATL": 1.81,
+          "QC": 1.36,
+          "ON": 1.16,
+          "MB": 1.54,
           "SK": 2.84,
-          "AB": 1.95,
-          "BC": 0.96,
+          "AB": 1.94,
+          "BC": 0.95,
           "CA": 1.09
         }
       }
@@ -257,49 +257,49 @@
       "verdict": "no_clear_difference"
     },
     "coefficients_last_origin": {
-      "cutoff": "2026-07",
+      "cutoff": "2026-08",
       "by_region": {
         "ATL": {
-          "phi": 0.2808,
-          "beta_unemployment": 0.1496,
-          "beta_rate": -0.351,
-          "n_obs": 364
+          "phi": 0.2806,
+          "beta_unemployment": 0.133,
+          "beta_rate": -0.3612,
+          "n_obs": 365
         },
         "QC": {
           "phi": 0.1366,
-          "beta_unemployment": 1.569,
-          "beta_rate": 2.982,
-          "n_obs": 364
+          "beta_unemployment": 1.5657,
+          "beta_rate": 2.9803,
+          "n_obs": 365
         },
         "ON": {
-          "phi": 0.3177,
-          "beta_unemployment": 0.8059,
-          "beta_rate": 1.9887,
-          "n_obs": 364
+          "phi": 0.3209,
+          "beta_unemployment": 0.7901,
+          "beta_rate": 1.9754,
+          "n_obs": 365
         },
         "MB": {
-          "phi": 0.078,
-          "beta_unemployment": 0.1677,
-          "beta_rate": -1.477,
-          "n_obs": 362
+          "phi": 0.0781,
+          "beta_unemployment": 0.167,
+          "beta_rate": -1.4768,
+          "n_obs": 363
         },
         "SK": {
-          "phi": 0.0618,
-          "beta_unemployment": 0.6912,
-          "beta_rate": 0.6917,
-          "n_obs": 362
+          "phi": 0.062,
+          "beta_unemployment": 0.6478,
+          "beta_rate": 0.6768,
+          "n_obs": 363
         },
         "AB": {
-          "phi": 0.4703,
-          "beta_unemployment": 1.1191,
-          "beta_rate": 0.3287,
-          "n_obs": 364
+          "phi": 0.4704,
+          "beta_unemployment": 1.1198,
+          "beta_rate": 0.3292,
+          "n_obs": 365
         },
         "BC": {
-          "phi": 0.2367,
-          "beta_unemployment": 0.8585,
-          "beta_rate": 0.0432,
-          "n_obs": 364
+          "phi": 0.2361,
+          "beta_unemployment": 0.87,
+          "beta_rate": 0.051,
+          "n_obs": 365
         }
       }
     }
@@ -426,15 +426,15 @@
             "ci_low": 0.57,
             "ci_high": 0.65
           },
-          "n_origins": 54
+          "n_origins": 55
         },
         "h3": {
           "mae_bp": {
-            "value": 1.33,
-            "ci_low": 1.17,
-            "ci_high": 1.39
+            "value": 1.32,
+            "ci_low": 1.18,
+            "ci_high": 1.4
           },
-          "n_origins": 52
+          "n_origins": 53
         }
       },
       "ar1": {
@@ -442,35 +442,35 @@
           "mae_bp": {
             "value": 0.59,
             "ci_low": 0.55,
-            "ci_high": 0.61
+            "ci_high": 0.62
           },
-          "n_origins": 54
+          "n_origins": 55
         },
         "h3": {
           "mae_bp": {
             "value": 1.26,
             "ci_low": 1.13,
-            "ci_high": 1.33
+            "ci_high": 1.34
           },
-          "n_origins": 52
+          "n_origins": 53
         }
       },
       "arx": {
         "h1": {
           "mae_bp": {
             "value": 0.58,
-            "ci_low": 0.53,
+            "ci_low": 0.54,
             "ci_high": 0.61
           },
-          "n_origins": 54
+          "n_origins": 55
         },
         "h3": {
           "mae_bp": {
             "value": 1.23,
             "ci_low": 1.08,
-            "ci_high": 1.33
+            "ci_high": 1.34
           },
-          "n_origins": 52
+          "n_origins": 53
         }
       }
     }
