@@ -51,6 +51,9 @@ MAX_COVERAGE_80: Final = 0.90
 DEV_START: Final = pd.Timestamp("2007-01-01")
 DEV_END: Final = pd.Timestamp("2016-12-01")
 TEST_START: Final = pd.Timestamp("2017-01-01")
+# The backtest window is frozen at the last month in the committed reports (ADR 0007).
+# New months from the weekly refresh feed the live forecast ledger only.
+BACKTEST_LAST_MONTH: Final = pd.Timestamp("2026-08-01")
 
 # "Metrics" in docs/eval_plan.md: the test period split into pre-pandemic, payment
 # deferrals, and after. Reported in `reports/metrics.json` but never used for the
@@ -122,6 +125,11 @@ def load_panel(data_dir: Path = Path("data")) -> pd.DataFrame:
             }
         )
     return features.build_feature_panel(arrears, unemployment, mortgage_rate, labour_force)
+
+
+def freeze_panel(panel: pd.DataFrame) -> pd.DataFrame:
+    """Drop every month after `BACKTEST_LAST_MONTH`, so later data cannot move a report."""
+    return panel[panel["month"] <= BACKTEST_LAST_MONTH].reset_index(drop=True)
 
 
 def _assert_no_lookahead(history: pd.Series, cutoff: pd.Timestamp) -> None:

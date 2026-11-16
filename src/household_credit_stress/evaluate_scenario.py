@@ -31,7 +31,7 @@ HEADLINE_HORIZON = scenario.CHECK_HORIZONS[0]
 
 def run_scenario_evaluation(data_dir: Path = Path("data")) -> tuple[dict[str, Any], pd.DataFrame]:
     """Runs the conditional backtest and builds the verdict, label and bands."""
-    panel = backtest.load_panel(data_dir)
+    panel = backtest.freeze_panel(backtest.load_panel(data_dir))
     last_month = pd.Timestamp(panel["month"].max())
     origins = pd.date_range(backtest.DEV_START, last_month, freq="MS")
     rows = scenario.run_conditional_backtest(panel, origins)

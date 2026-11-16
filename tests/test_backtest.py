@@ -327,3 +327,11 @@ def test_committed_backtest_and_metrics_match_a_fresh_run() -> None:
     pd.testing.assert_frame_equal(
         committed_rows, fresh_rows.reset_index(drop=True), check_like=False
     )
+
+
+def test_freeze_panel_drops_months_after_the_frozen_window() -> None:
+    months = pd.to_datetime(["2026-07-01", "2026-08-01", "2026-09-01", "2026-10-01"])
+    panel = pd.DataFrame({"month": months, "region": "ON", "arrears_bp": [1.0, 2.0, 3.0, 4.0]})
+    frozen = backtest.freeze_panel(panel)
+    assert frozen["month"].max() == backtest.BACKTEST_LAST_MONTH
+    assert len(frozen) == 2

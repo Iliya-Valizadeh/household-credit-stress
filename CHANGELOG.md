@@ -6,6 +6,10 @@ git tag.
 
 ## [Unreleased]
 
+### Changed
+
+- The [backtest](docs/glossary.md#backtest) window is frozen at August 2026, so the weekly refresh updates only the live forecast record (ADR 0007).
+
 ## [1.0.0] - 2026-10-20
 
 ### Added

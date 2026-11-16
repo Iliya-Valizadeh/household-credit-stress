@@ -28,7 +28,7 @@ HEADLINE_HORIZON = 1
 
 def run_evaluation(data_dir: Path = Path("data")) -> tuple[dict[str, Any], pd.DataFrame]:
     """Run the whole backtest. Returns the metrics dict and the backtest rows."""
-    panel = backtest.load_panel(data_dir)
+    panel = backtest.freeze_panel(backtest.load_panel(data_dir))
     last_month = pd.Timestamp(panel["month"].max())
     origins = pd.date_range(backtest.DEV_START, last_month, freq="MS")
     rows = backtest.run_backtest(panel, origins)
